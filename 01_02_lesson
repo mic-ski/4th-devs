@@ -1,0 +1,269 @@
+# Lesson Summary: Connecting LLMs to Tools
+
+## Core idea
+
+An LLM cannot directly interact with the outside world. It only generates text or structured output.
+
+To use tools, the model does this:
+
+1. receives the user request plus tool definitions
+2. chooses a tool and generates a structured call
+3. the application runs the tool
+4. the tool result is added back to the conversation
+5. the model is called again to produce the final answer
+
+So tool use is usually a loop, not a single model call. :contentReference[oaicite:0]{index=0}
+
+## What Function Calling really is
+
+Function Calling lets the model request actions such as:
+
+- reading files
+- calling APIs
+- searching the web
+- sending email
+
+The model does not execute them itself. Your code executes them. The model only decides:
+
+- which tool to use
+- when to use it
+- what arguments to pass :contentReference[oaicite:1]{index=1}
+
+## Main design principle
+
+Do not expose your raw API to the model 1:1.
+
+APIs are designed for programmers with documentation. LLM tools should be designed for a model working from names, descriptions, schemas, and previous context only.
+
+That means tools should be:
+
+- simple
+- task oriented
+- low noise
+- hard to misuse
+- optimized for fewer steps :contentReference[oaicite:2]{index=2}
+
+## Good tool design
+
+A good tool should have:
+
+- a specific, unambiguous name
+- a short description with high signal
+- only necessary input fields
+- minimal but useful output
+- helpful errors
+- safe defaults
+
+Important rule: ask for only what the model must provide. Everything else should be filled or controlled by application code when possible. Internal IDs, permissions, and security sensitive values should usually stay outside model control. :contentReference[oaicite:3]{index=3}
+
+## Validation and error handling
+
+For LLM systems, validation and errors matter more than in normal apps.
+
+Bad:
+- "Something went wrong"
+
+Good:
+- what failed
+- why it failed
+- what the model can try next
+
+Useful patterns:
+
+- suggest correct values when input is close
+- explain missing required fields
+- point to another tool if needed to fetch missing data
+- allow flexible input formats when safe :contentReference[oaicite:4]{index=4}
+
+## Defaults and safeguards
+
+Tool design should reduce effort for the model.
+
+Examples:
+
+- assign current user automatically instead of asking the model for user ID
+- use sensible default sorting and filtering
+- allow names instead of IDs if collisions are handled
+- tolerate plan or feature limitations gracefully
+
+For risky actions, add stronger protections:
+
+- user confirmation
+- allowlists
+- dry run mode
+- code level permission checks :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+
+## Native tools vs custom tools
+
+Providers may offer native tools such as:
+
+- web search
+- code execution
+- PDF handling
+
+These are convenient, but less configurable.
+
+Custom tools give more control.
+
+A system can combine both:
+- native tools for common capabilities
+- custom tools for app specific actions :contentReference[oaicite:7]{index=7}
+
+## API vs CLI vs Function Calling
+
+### API
+Direct and flexible, but the model usually needs docs and you have little control.
+
+### CLI
+Often easier for agents because `--help` explains usage. Good on local machines, harder at scale.
+
+### Function Calling / MCP
+Most controlled option. You expose a curated set of tools. Safer and cleaner, but less flexible. :contentReference[oaicite:8]{index=8}
+
+## Augmented Function Calling
+
+Sometimes a tool needs extra usage guidance.
+
+Example:
+an image generation tool may always add style instructions before sending the final prompt.
+
+This means tool use can be enriched by extra context, such as:
+
+- commands
+- skills
+- reusable prompts
+- dynamic tool specific instructions :contentReference[oaicite:9]{index=9}
+
+## Workflow vs agent
+
+### Workflow
+A predefined sequence of steps.
+More predictable.
+Better when the process is stable.
+
+### Agent
+A model running in a loop, deciding what to do next.
+More flexible.
+Less predictable.
+
+Use workflows when structure is clear.
+Use agents when adaptation matters.
+Do not assume an agent is always the better choice. :contentReference[oaicite:10]{index=10}
+
+## Agent harness
+
+A real agent system is more than the model.
+
+It may include:
+
+- application logic
+- tools
+- short term and long term memory
+- file system
+- code sandbox
+- context management
+- monitoring
+- communication between agents
+
+Most of this is still standard software engineering. The hard part is that the model controls part of the behavior. :contentReference[oaicite:11]{index=11}
+
+## Reasoning is helpful, but not enough
+
+Modern models may reason before acting. This often improves results, but it is not the whole solution.
+
+Performance also depends on:
+
+- planning
+- task lists
+- discovery of needed information
+- attention control
+- sometimes using multiple models
+
+So better agents come from system design, not just from turning on reasoning mode. :contentReference[oaicite:12]{index=12}
+
+## Query transformation and knowledge access
+
+User wording often does not match stored knowledge directly.
+
+The system may need to transform the query by adding:
+
+- synonyms
+- related concepts
+- context specific hints
+
+Agents also need help discovering what knowledge exists. A map or index of files can help a lot. Otherwise the model may fail simply because it does not know where to look. :contentReference[oaicite:13]{index=13}
+
+## Context management
+
+Context is expensive and limited.
+
+Problems:
+
+- tool definitions consume tokens
+- tool results consume tokens
+- long threads hit context limits
+- dynamic prompts can break cache efficiency
+
+Practical rules:
+
+- prioritize prompt caching
+- keep system prompts stable
+- keep tool outputs compact
+- store large outputs in files
+- let the agent fetch only needed fragments later
+- avoid too many tools in one context window :contentReference[oaicite:14]{index=14}
+
+## Dynamic tools and progressive disclosure
+
+Too many tools reduce quality and waste context.
+
+Guideline:
+keep roughly 10 to 15 tools available to one agent when possible.
+
+To scale beyond that, use:
+
+- sub agents with separate toolsets
+- code execution environments
+- progressive disclosure, where the agent discovers more tools only when needed
+
+The model should always get at least minimal hints about what resources and tools exist. :contentReference[oaicite:15]{index=15}
+
+## Permissions, user input, and consent
+
+Do not trust the model alone for critical inputs or irreversible actions.
+
+Safer pattern:
+
+- use UI forms for exact user data
+- use buttons for approval
+- enforce permissions in code
+- never let the model define security critical identifiers on its own :contentReference[oaicite:16]{index=16}
+
+## Biggest warning: prompt injection
+
+Prompt injection is a major unresolved problem.
+
+If an agent can read untrusted content and also access tools, malicious text may manipulate it into leaking data or taking harmful actions.
+
+There is no complete defense today.
+
+Practical conclusion:
+do not give agents dangerous access unless the environment, permissions, and product design already make failure acceptable or contained. :contentReference[oaicite:17]{index=17}
+
+## Bottom line
+
+Connecting LLMs to tools is easy at the API level.
+
+Doing it well is hard.
+
+The real work is in:
+
+- tool design
+- validation
+- defaults
+- safety
+- context management
+- choosing workflow vs agent
+- limiting risk from nondeterminism and prompt injection
+
+That is the core engineering challenge of agentic systems. :contentReference[oaicite:18]{index=18}

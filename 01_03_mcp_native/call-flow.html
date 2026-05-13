@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_native — Call Flow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: { curve: 'basis', padding: 20 },
+      themeVariables: {
+        darkMode: true,
+        background: '#0d1117',
+        mainBkg: '#161b22',
+        nodeBorder: '#30363d',
+        clusterBkg: '#161b22',
+        clusterBorder: '#30363d',
+        edgeLabelBackground: '#0d1117',
+        fontFamily: 'Cascadia Code, Fira Code, monospace',
+        fontSize: '13px',
+      }
+    });
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 24px 48px;
+    }
+
+    header {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 13px;
+      color: #4a5568;
+      margin-bottom: 28px;
+      letter-spacing: 0.03em;
+      align-self: flex-start;
+    }
+
+    .diagram-wrap {
+      width: 100%;
+      max-width: 960px;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 32px 24px;
+    }
+
+    .legend {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 30px;
+      height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .swatch-dashed {
+      border: 1.5px dashed;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+
+<header>01_03_mcp_native / call flow — entry point to MCP &amp; native tool calls</header>
+
+<div class="diagram-wrap">
+  <pre class="mermaid">
+flowchart TD
+
+    MAIN(["main()  ·  app.js"]):::entry
+
+    subgraph SETUP ["  Setup  "]
+        CMS("createMcpServer()")
+        CMC("createMcpClient(server)")
+        IMP[["InMemoryTransport\n.createLinkedPair()"]]
+        LMT("listMcpTools(client)")
+        CLT[["client.listTools()\n· MCP call"]]
+        MTO("mcpToolsToOpenAI(mcpTools)")
+        CA("createAgent()")
+    end
+
+    subgraph LOOP ["  agent.processQuery()  —  loops per query, up to 10 rounds  "]
+        LQ("logQuery()")
+        CHAT("chat()  ·  src/ai.js")
+        API[["fetch  →  Responses API\n· ext. HTTP"]]
+        ETC("extractToolCalls(response)")
+        DEC{"tool calls?"}
+    end
+
+    subgraph EXEC ["  executeToolCall()  "]
+        HT{"handler\ntype?"}
+        CMCT("callMcpTool()")
+        CTL[["client.callTool()\n· MCP protocol"]]
+        NATC("nativeHandlers\n.calculate()")
+        NATU("nativeHandlers\n.uppercase()")
+        TLOG("logToolCall / logToolResult\nlogToolError")
+    end
+
+    subgraph RESP ["  Response  "]
+        ETX("extractText(response)")
+        LRE("logResponse()")
+    end
+
+    MAIN --> CMS
+    MAIN --> CMC --> IMP
+    MAIN --> LMT --> CLT
+    MAIN --> MTO
+    MAIN --> CA
+    MAIN --> LQ
+
+    LQ --> CHAT --> API
+    CHAT --> ETC --> DEC
+
+    DEC -->|"yes"| HT
+    DEC -->|"no"| ETX
+
+    HT -->|"MCP"| CMCT --> CTL --> TLOG
+    HT -->|"native"| NATC --> TLOG
+    HT -->|"native"| NATU --> TLOG
+    TLOG -->|"next round"| CHAT
+
+    ETX --> LRE
+
+    classDef entry   fill:#7c2d12,stroke:#f97316,color:#fff
+    classDef mcp     fill:#0c4a6e,stroke:#38bdf8,color:#bae6fd
+    classDef native  fill:#052e16,stroke:#4ade80,color:#bbf7d0
+    classDef ext     fill:#1c1917,stroke:#57534e,color:#78716c,stroke-dasharray:5 3
+    classDef dim     fill:#161b22,stroke:#30363d,color:#4a5568
+
+    class MAIN entry
+    class CMCT,CTL,CLT mcp
+    class NATC,NATU native
+    class API,IMP ext
+    class TLOG dim
+  </pre>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="swatch" style="background:#7c2d12; border: 1px solid #f97316;"></div>
+    Entry point
+  </div>
+  <div class="legend-item">
+    <div class="swatch" style="background:#0c4a6e; border: 1px solid #38bdf8;"></div>
+    MCP call (protocol boundary)
+  </div>
+  <div class="legend-item">
+    <div class="swatch" style="background:#052e16; border: 1px solid #4ade80;"></div>
+    Native tool (plain JS)
+  </div>
+  <div class="legend-item">
+    <div class="swatch swatch-dashed" style="border-color:#57534e; color:#57534e;">
+    </div>
+    External call (HTTP / in-memory transport)
+  </div>
+</div>
+
+</body>
+</html>

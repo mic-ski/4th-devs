@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_native — Module Graph</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      font-size: 13px;
+      color: #4a5568;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.03em;
+    }
+
+    svg { width: 100vw; height: 100vh; }
+
+    .link {
+      fill: none;
+      stroke: #253347;
+      stroke-width: 1.8;
+      marker-end: url(#arrow);
+    }
+    .link.lit {
+      stroke: #60a5fa;
+      stroke-width: 2.5;
+      marker-end: url(#arrow-blue);
+    }
+
+    .node circle {
+      stroke-width: 2.5;
+      cursor: grab;
+    }
+    .node circle:active { cursor: grabbing; }
+    .node circle.lit { filter: brightness(1.35) drop-shadow(0 0 8px currentColor); }
+
+    .node text {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    #tooltip {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      background: #161f2e;
+      border: 1px solid #1e3050;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 12px;
+      max-width: 310px;
+      line-height: 1.75;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    #tooltip .tt-path {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    #tooltip .tt-section {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #334155;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    #tooltip .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .chip {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .chip-export { background: #052e16; color: #86efac; border: 1px solid #14532d; }
+    .chip-import { background: #1e1a2e; color: #c4b5fd; border: 1px solid #3b1f6b; }
+
+    .tt-from {
+      font-size: 11px;
+      color: #475569;
+      margin: 4px 0 3px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .legend {
+      position: absolute;
+      bottom: 22px;
+      left: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .legend-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 22px;
+      right: 22px;
+      font-size: 11px;
+      color: #253347;
+    }
+  </style>
+</head>
+<body>
+
+<header>01_03_mcp_native / module dependency graph</header>
+<div id="tooltip"></div>
+
+<svg id="graph">
+  <defs>
+    <marker id="arrow" viewBox="0 -5 10 10" refX="10" refY="0"
+            markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,-5L10,0L0,5" fill="#253347" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 -5 10 10" refX="10" refY="0"
+            markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,-5L10,0L0,5" fill="#60a5fa" />
+    </marker>
+  </defs>
+  <g id="layer"></g>
+</svg>
+
+<div class="legend">
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#f97316; outline: 2px solid #ea580c; outline-offset: 1px;"></div>
+    Entry point
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#1d4ed8; outline: 2px solid #3b82f6; outline-offset: 1px;"></div>
+    Local module
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#6b21a8; outline: 2px solid #a855f7; outline-offset: 1px;"></div>
+    Shared config
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#1e293b; outline: 2px solid #475569; outline-offset: 1px;"></div>
+    npm package
+  </div>
+</div>
+
+<div class="hint">scroll to zoom · drag nodes · hover for details</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+
+const COLORS = {
+  entry:  { fill: '#f97316', stroke: '#ea580c', text: '#fff' },
+  local:  { fill: '#1d4ed8', stroke: '#3b82f6', text: '#bfdbfe' },
+  config: { fill: '#6b21a8', stroke: '#a855f7', text: '#e9d5ff' },
+  npm:    { fill: '#1e293b', stroke: '#475569', text: '#94a3b8' },
+};
+
+const RADIUS = {
+  entry:  44,
+  local:  38,
+  config: 36,
+  npm:    30,
+};
+
+const nodes = [
+  {
+    id: 'app.js',
+    lines: ['app.js'],
+    type: 'entry',
+    path: 'app.js',
+    exports: [],
+  },
+  {
+    id: 'agent.js',
+    lines: ['agent.js'],
+    type: 'local',
+    path: 'src/agent.js',
+    exports: ['createAgent'],
+  },
+  {
+    id: 'ai.js',
+    lines: ['ai.js'],
+    type: 'local',
+    path: 'src/ai.js',
+    exports: ['chat', 'extractToolCalls', 'extractText'],
+  },
+  {
+    id: 'log.js',
+    lines: ['log.js'],
+    type: 'local',
+    path: 'src/log.js',
+    exports: ['MCP_LABEL', 'NATIVE_LABEL', 'logQuery', 'logToolCall', 'logToolResult', 'logToolError', 'logToolCount', 'logResponse'],
+  },
+  {
+    id: 'mcp/client.js',
+    lines: ['mcp/', 'client.js'],
+    type: 'local',
+    path: 'src/mcp/client.js',
+    exports: ['createMcpClient', 'listMcpTools', 'callMcpTool', 'mcpToolsToOpenAI'],
+  },
+  {
+    id: 'mcp/server.js',
+    lines: ['mcp/', 'server.js'],
+    type: 'local',
+    path: 'src/mcp/server.js',
+    exports: ['createMcpServer'],
+  },
+  {
+    id: 'native/tools.js',
+    lines: ['native/', 'tools.js'],
+    type: 'local',
+    path: 'src/native/tools.js',
+    exports: ['nativeTools', 'nativeHandlers'],
+  },
+  {
+    id: 'config.js',
+    lines: ['config.js'],
+    type: 'config',
+    path: '../config.js',
+    exports: ['resolveModelForProvider', 'AI_API_KEY', 'EXTRA_API_HEADERS', 'RESPONSES_API_ENDPOINT'],
+  },
+  {
+    id: '@mcp/sdk',
+    lines: ['@mcp/sdk'],
+    type: 'npm',
+    path: '@modelcontextprotocol/sdk',
+    exports: ['Client', 'InMemoryTransport', 'McpServer'],
+  },
+  {
+    id: 'zod',
+    lines: ['zod'],
+    type: 'npm',
+    path: 'zod',
+    exports: ['z'],
+  },
+];
+
+const links = [
+  { source: 'app.js',        target: 'mcp/server.js',   imports: ['createMcpServer'] },
+  { source: 'app.js',        target: 'mcp/client.js',   imports: ['createMcpClient', 'listMcpTools', 'mcpToolsToOpenAI', 'callMcpTool'] },
+  { source: 'app.js',        target: 'native/tools.js', imports: ['nativeTools', 'nativeHandlers'] },
+  { source: 'app.js',        target: 'agent.js',        imports: ['createAgent'] },
+  { source: 'app.js',        target: 'log.js',          imports: ['MCP_LABEL', 'NATIVE_LABEL'] },
+  { source: 'app.js',        target: 'config.js',       imports: ['resolveModelForProvider'] },
+  { source: 'agent.js',      target: 'ai.js',           imports: ['chat', 'extractToolCalls', 'extractText'] },
+  { source: 'agent.js',      target: 'log.js',          imports: ['logQuery', 'logToolCall', 'logToolResult', 'logToolError', 'logToolCount', 'logResponse'] },
+  { source: 'ai.js',         target: 'config.js',       imports: ['AI_API_KEY', 'EXTRA_API_HEADERS', 'RESPONSES_API_ENDPOINT'] },
+  { source: 'mcp/client.js', target: '@mcp/sdk',        imports: ['Client', 'InMemoryTransport'] },
+  { source: 'mcp/server.js', target: '@mcp/sdk',        imports: ['McpServer'] },
+  { source: 'mcp/server.js', target: 'zod',             imports: ['z'] },
+];
+
+// ── Layout ───────────────────────────────────────────────────────────────────
+
+const W = window.innerWidth;
+const H = window.innerHeight;
+
+const svg   = d3.select('#graph');
+const layer = d3.select('#layer');
+
+const zoom = d3.zoom()
+  .scaleExtent([0.25, 4])
+  .on('zoom', e => layer.attr('transform', e.transform));
+
+svg.call(zoom);
+
+const simulation = d3.forceSimulation(nodes)
+  .force('link',      d3.forceLink(links).id(d => d.id).distance(175).strength(0.55))
+  .force('charge',    d3.forceManyBody().strength(-700))
+  .force('center',    d3.forceCenter(W / 2, H / 2))
+  .force('collision', d3.forceCollide().radius(d => RADIUS[d.type] + 22));
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+// Point on a circle's edge in the direction from (sx,sy) toward (tx,ty)
+function circleEdge(sx, sy, tx, ty, r) {
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  return { x: tx - (dx / dist) * r, y: ty - (dy / dist) * r };
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(event, d) {
+  const inbound = links.filter(l => l.target.id === d.id);
+
+  let html = `<div class="tt-path">${d.path}</div>`;
+
+  if (d.exports.length) {
+    html += `<div class="tt-section">Exports</div><div class="chips">`;
+    html += d.exports.map(e => `<span class="chip chip-export">${e}</span>`).join('');
+    html += `</div>`;
+  } else {
+    html += `<div class="tt-section" style="color:#253347">No exports — entry point</div>`;
+  }
+
+  if (inbound.length) {
+    html += `<div class="tt-section">Used by</div>`;
+    inbound.forEach(l => {
+      html += `<div class="tt-from">← ${l.source.id}</div>`;
+      html += `<div class="chips">`;
+      html += l.imports.map(i => `<span class="chip chip-import">${i}</span>`).join('');
+      html += `</div>`;
+    });
+  }
+
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = '1';
+  placeTooltip(event);
+}
+
+function placeTooltip(event) {
+  const pad = 16;
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  let x = event.pageX + 16;
+  let y = event.pageY - 10;
+  if (x + tw + pad > W) x = event.pageX - tw - 16;
+  if (y + th + pad > H) y = H - th - pad;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+
+// ── Render links ─────────────────────────────────────────────────────────────
+
+const linkEls = layer.selectAll('.link')
+  .data(links)
+  .join('line')
+  .attr('class', 'link');
+
+// ── Render nodes ─────────────────────────────────────────────────────────────
+
+const nodeEls = layer.selectAll('.node')
+  .data(nodes)
+  .join('g')
+  .attr('class', 'node')
+  .call(
+    d3.drag()
+      .on('start', (e, d) => {
+        if (!e.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x; d.fy = d.y;
+      })
+      .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end',   (e, d) => {
+        if (!e.active) simulation.alphaTarget(0);
+        d.fx = null; d.fy = null;
+      })
+  )
+  .on('mouseenter', function(event, d) {
+    d3.select(this).select('circle').classed('lit', true);
+    linkEls
+      .classed('lit', l => l.source.id === d.id || l.target.id === d.id);
+    showTooltip(event, d);
+  })
+  .on('mousemove', (event) => placeTooltip(event))
+  .on('mouseleave', function() {
+    d3.select(this).select('circle').classed('lit', false);
+    linkEls.classed('lit', false);
+    tooltip.style.opacity = '0';
+  });
+
+nodeEls.append('circle')
+  .attr('r',      d => RADIUS[d.type])
+  .attr('fill',   d => COLORS[d.type].fill)
+  .attr('stroke', d => COLORS[d.type].stroke);
+
+nodeEls.each(function(d) {
+  const g = d3.select(this);
+  const color = COLORS[d.type].text;
+
+  if (d.lines.length === 1) {
+    g.append('text')
+      .attr('dy', '0.35em')
+      .attr('font-size', d.type === 'entry' ? '13px' : '12px')
+      .attr('fill', color)
+      .text(d.lines[0]);
+  } else {
+    // Two-line label: dim prefix (mcp/, native/) + bold filename
+    g.append('text')
+      .attr('dy', '-0.45em')
+      .attr('font-size', '9px')
+      .attr('fill', color)
+      .attr('opacity', '0.55')
+      .text(d.lines[0]);
+    g.append('text')
+      .attr('dy', '0.85em')
+      .attr('font-size', '12px')
+      .attr('fill', color)
+      .text(d.lines[1]);
+  }
+});
+
+// ── Simulation tick ───────────────────────────────────────────────────────────
+
+simulation.on('tick', () => {
+  linkEls.each(function(d) {
+    const r_s = RADIUS[d.source.type];
+    const r_t = RADIUS[d.target.type];
+    const start = circleEdge(d.target.x, d.target.y, d.source.x, d.source.y, r_s);
+    const end   = circleEdge(d.source.x, d.source.y, d.target.x, d.target.y, r_t);
+    d3.select(this)
+      .attr('x1', start.x).attr('y1', start.y)
+      .attr('x2', end.x  ).attr('y2', end.y  );
+  });
+
+  nodeEls.attr('transform', d => `translate(${d.x},${d.y})`);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+name,surname,born,city,Zabrze_km,Piotrków Trybunalski_km,Grudziądz_km,Tczew_km,Radom_km,Chelmno_km,Żarnowiec_km,closest_plant,closest_plant_code,closest_distance_km
+Cezary,Żurek,1987,Grudziądz,0.862,43.323,194.921,261.079,122.186,189.191,65.573,Zabrze,PWR3847PL,0.862
+Jacek,Nowak,1991,Grudziądz,9.693,121.714,335.921,404.203,157.871,323.506,50.477,Zabrze,PWR3847PL,9.693
+Oskar,Sieradzki,1993,Grudziądz,386.760,293.570,56.114,7.828,332.786,67.592,391.306,Tczew,PWR1593PL,7.828
+Wojciech,Bielik,1986,Grudziądz,293.821,224.533,26.444,85.241,284.871,0.843,319.675,Chelmno,PWR2758PL,0.843
+Wacław,Jasiński,1986,Grudziądz,106.548,87.166,192.756,215.348,13.136,212.646,43.168,Radom,PWR8406PL,13.136

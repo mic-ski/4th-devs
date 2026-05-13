@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>s01e02-techniki-laczenia-modelu-z-narzedziami-1773132164.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+<link rel="stylesheet" href="file://c:\VSCODE\4th-devs\dark-theme.css" type="text/css">
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<p><img src="https://vimeo.com/1171062996" alt="https://vimeo.com/1171062996"></p>
+<p>Wiemy już, że możemy programistycznie sterować zachowaniem modelu, a generowane treści mogą być strukturyzowane i wykorzystane w logice aplikacji. Proces ten może zostać w pewnym sensie odwrócony, a model może &quot;przejąć kontrolę&quot; nad logiką aplikacji. W tym celu wykorzystamy wspomniany już <strong>Function Calling</strong>.</p>
+<p>Zanim zaczniemy, mam jeszcze komentarz do osób będących w poprzednich edycjach AI_devs, gdzie wprost z Function Calling raczej nie korzystaliśmy. Powodem zmiany podejścia jest rozwój modeli oraz usunięcie lub zmniejszenie ograniczeń API. Obecnie Function Calling bez przeszkód może stanowić element logiki w którym pojawia się LLM.</p>
+<p>To tyle, zaczynajmy!</p>
+<h2 id="zasady-łączenia-modelu-językowego-z-narzędziami">Zasady łączenia modelu językowego z narzędziami</h2>
+<p>Narzędzia takie jak ChatGPT, Claude czy Cursor na co dzień nam pokazują, że LLM może pracować z systemem plików, przeszukiwać Internet czy posługiwać się różnymi narzędziami. Jednak z technicznego punktu widzenia <strong>model językowy nie ma możliwości wchodzić w interakcję z otoczeniem</strong> i może jedynie generować treści, zwykle w formie tekstu.</p>
+<p>Widzieliśmy jednak, że LLM potrafią generować obiekty JSON na podstawie swojej wiedzy bazowej lub dostarczonych przez nas informacji. Sam format JSON znamy z codziennej pracy, na przykład dzięki wykorzystaniu API, które pozwalają na pobieranie danych oraz wykonywanie różnych operacji w zewnętrznych i wewnętrznych serwisach. Istnieje więc przynajmniej kilka cech wspólnych pomiędzy integracją z API a możliwością generowania strukturyzowanych danych przez model, które możemy wykorzystać.</p>
+<p>Schemat łączenia LLM z narzędziami (Function Calling / Tool Use) wygląda następująco:</p>
+<p><img src="https://cloud.overment.com/2026-01-21/ai_devs_4_function_calling-e9d7ae64-f.png" alt="Schemat Function Calling / Tool Use"></p>
+<p>Minimalny przykład prezentujący to, jak agent posługuje się narzędziami znajduje się w katalogu <strong>01_02_tools</strong>. Po jego uruchomieniu, bardzo prosty &quot;agent&quot; odpowie na pytanie o pogodę w Krakowie.</p>
+<p>LLM fizycznie nie ma zapisanych informacji na temat aktualnej pogody w Krakowie. Pomimo tego Function Calling pozwolił modelowi na pozyskanie tych informacji przez dostępne narzędzia. Konkretnie:</p>
+<ol>
+<li>Użytkownik zapytał o pogodę w Krakowie</li>
+<li>Model otrzymał zapytanie oraz <strong>schematy trzech narzędzi</strong>: &quot;get_weather&quot;, &quot;search_web&quot; oraz &quot;send_email&quot;</li>
+<li>Zamiast natychmiast odpowiedzieć użytkownikowi model zwrócił obiekt JSON z <strong>nazwą narzędzia</strong> oraz <strong>argumenty</strong> potrzebne do jego uruchomienia.</li>
+<li>Następnie <strong>kod aplikacji</strong> wykorzystał wygenerowane dane, aby <strong>uruchomić funkcję</strong> pobierającą informacje z API pogodowego.</li>
+<li>Zarówno <strong>informacja o uruchomieniu narzędzia</strong> oraz <strong>informacje pogodowe, które zostały zwrócone</strong>, trafiły do kontekstu konwersacji.</li>
+<li>Następnie model został wywołany <strong>ponownie</strong>, lecz tym razem ze względu na dostęp do potrzebnych informacji, podjął decyzję o <strong>zwróceniu finalnej odpowiedzi</strong> dla użytkownika.</li>
+</ol>
+<p>Spójrzmy na tę interakcję raz jeszcze, ale teraz z bardziej technicznej perspektywy. Jej najważniejsze punkty to:</p>
+<ul>
+<li>Definicje <strong>wszystkich narzędzi</strong> są dołączone do <strong>każdego</strong> zapytania i to nawet wtedy, jeśli nie zostaną uruchomione. Ma to negatywny wpływ na skuteczność działania modelu oraz zużycie kontekstu.</li>
+<li>Definicje narzędzi obejmujące <strong>nazwę, opis, schemat oraz callback</strong>. Callback to funkcja, która zostaje uruchomiona w chwili gdy model zwróci nazwę narzędzia oraz argumenty.</li>
+<li>Interakcja składa się <strong>nie z jednego, lecz dwóch zapytań do LLM</strong>. Zwykle taki kod uruchomiony jest w pętli, która zwykle trwa tak długo aż model zwróci finalną odpowiedź bądź gdy wyczerpie limit dostępnych kroków.</li>
+<li>W historii konwersacji zostają zapisane <strong>wszystkie narzędzia oraz zwrócone przez nie dane</strong>. Oznacza to, że wpływają one na zużycie kontekstu oraz koszty.</li>
+</ul>
+<p><img src="https://cloud.overment.com/2026-01-21/ai_devs_4_function_calling-ef4b5aa4-e.png" alt=""></p>
+<p>Zobaczmy teraz jak Function Calling działa w praktyce poprzez przykład <a href="https://github.com/i-am-alice/4th-devs/tree/main/01_02_tool_use">01_02_tool_use</a>. Logika w nim zawarta umożliwia modelowi interakcję z systemem plików ale tylko i wyłącznie we wskazanym katalogu (co jest ograniczone programistycznie).</p>
+<p>Do interakcji z systemem plików przygotowałem zestaw podstawowych narzędzi działających w uproszczonej formie. Mamy zatem możliwość <strong>przeglądania katalogów, wyświetlania plików, zapisywania i usuwania treści, tworzenia katalogów oraz pobierania informacji o plikach</strong>. Pozwala to na kompletną, choć bardzo ograniczoną interakcję z lokalnymi plikami. Wystarcza to jednak, aby model poprawnie realizował polecenia zapisane w języku naturalnym.</p>
+<p>Poniższy schemat pokazuje także, że w sytuacji, gdy model celowo lub w wyniku halucynacji spróbuje utworzyć plik w katalogu, do którego nie ma dostępu, aplikacja nadal będzie działać, a model otrzyma jasną informację o błędzie. Pozwala to na podjęcie działań polegających albo na skorzystaniu z narzędzia w inny sposób, albo na poinformowaniu użytkownika o braku uprawnień.</p>
+<p><img src="https://cloud.overment.com/2026-01-21/ai_devs_4_filesystem_overview-5d0a8bea-2.png" alt="Ogólna struktura i przykłady narzędzi do interakcji z systemem plików"></p>
+<p>W lekcji <strong>S01E01</strong> mówiliśmy o tym, że na potrzeby <strong>Structured Outputs</strong> schemat odpowiedzi przesyłany jest wraz z zapytaniem i trafia do modelu razem z instrukcją systemową oraz pozostałym kontekstem konwersacji. W przypadku <strong>Function Calling</strong> jest podobnie.</p>
+<p>Raz jeszcze spójrzmy na wizualizację procesu budowy kontekstu zapytania, ponieważ istotne jest zrozumienie tego <strong>czym są narzędzia dla LLM</strong> oraz <strong>skąd model &quot;wie&quot; jak się nimi posługiwać</strong> oraz wykorzystywać zwracane przez informacje.</p>
+<p>W tym miejscu dobrze jest wrócić do narzędzia <a href="https://tiktokenizer.vercel.app/">Tiktokenizer</a> i przypomnieć sobie jak <strong>wiadomość systemowa, wiadomości użytkownika oraz asystenta</strong> trafiają do modelu w formie <strong>tokenów</strong>. W przypadku Function Calling jest tak samo i zwyczajnie mamy dodatkowy blok z listą definicji narzędzi. Model &quot;widzi&quot; więc ich nazwy, opisy oraz schematy. Te informacje wykorzystywane są w chwili gdy zapytanie użytkownika zaczyna sugerować konieczność skorzystania z danego narzędzia. Wówczas API zwraca żądanie wykonania funkcji.</p>
+<p><img src="https://cloud.overment.com/2026-01-21/ai_devs_4_assembly-50a6ebc7-8.png" alt=""></p>
+<p>Wiedza o tym, w jaki sposób model &quot;widzi&quot; narzędzia, powinna już teraz jasno sugerować, jak ogromną rolę odgrywają ich precyzyjne nazwy, opisy oraz powiązane z nimi schematy. Poza tym równie kluczową rolę pełnią odpowiedzi narzędzi oraz ich forma. Zarówno poprawne wywołanie narzędzia, jak i to zakończone błędem powinny jasno informować model o tym, co się wydarzyło oraz jakie kroki można podjąć.</p>
+<h2 id="function-calling-oraznatywne-orazwłasne-narzędzia">Function Calling oraz natywne oraz własne narzędzia</h2>
+<p>Przeszukiwanie sieci, deep research, odpowiadanie pytań na podstawie treści PDF czy uruchamianie kodu przez AI to narzędzia, które są na tyle uniwersalne, że większość providerów zdecydowała się udostępnić je natywnie. W lekcji <strong>S01E01</strong> nawet korzystaliśmy z narzędzia Web Search wbudowanego w API OpenAI w ramach przykładu <a href="https://github.com/i-am-alice/4th-devs/tree/main/01_01_grounding">01_01_grounding</a>.</p>
+<p>Natywne narzędzia są bardzo wygodne, bo zwykle wymagają jedynie zmiany ustawień obiektu żądania przy zapytaniu do LLM. Jednak w związku z tym, że związana z nimi logika znajduje się na serwerze danego providera, to jako developerzy mamy ograniczone możliwości ich konfiguracji. Może się więc okazać, że zamiast korzystać z natywnych narzędzi, będziemy chcieli zbudować własne. Ale też nie ma problemu z tym, aby korzystać <strong>równocześnie</strong> z natywnych i własnych narzędzi.</p>
+<p>Poniżej widzimy scenariusz w którym użytkownik prosi o przeszukanie sieci i zapisanie rezultatów w pliku. Model korzysta więc w pierwszej kolejności z natywnego narzędzia <code>web_search</code>, a następnie z zewnętrznego <code>file_write</code>.</p>
+<p><img src="https://cloud.overment.com/2026-01-21/ai_devs_4_native_external_tools-801a06be-7.png" alt="Połączenie natywnych i zewnętrznych narzędzi w LLM API"></p>
+<p>Ostatecznie to czy korzystamy z natywnych narzędzi, czy nie, zależy głównie od naszych preferencji oraz potrzeb. Warto jednak wiedzieć, że istnieje taka możliwość, ponieważ realnie ułatwia to budowanie o ile oddanie części kontroli nad konfiguracją narzędzi jest dla nas w porządku.</p>
+<h2 id="dobre-praktyki-opisywania-schematów-iich-właściwości">Dobre praktyki opisywania schematów i ich właściwości</h2>
+<p>Podłączenie narzędzi do LLM na ten moment nie stanowi żadnego wyzwania, bo sprowadza się do dodatkowej właściwości obiektu zapytania. Trudność leży projektowaniu narzędzi w taki sposób, aby model skutecznie się nimi posługiwał. Poza tym, będzie nam zależało na zachowaniu balansu pomiędzy możliwościami, a poziomem uprawnień.</p>
+<p>Największym błędem jaki popełniają programiści przy projektowaniu narzędzi, jest <strong>mapowanie istniejącego API 1:1</strong>. Błąd ten polega na tym, że API projektowane jest z myślą o <strong>programistach</strong> oraz <strong>deterministycznym kodzie</strong>. W dodatku programiści którzy z niego korzystają, posiadają łatwy dostęp do <strong>dokumentacji</strong>.</p>
+<p>Poniżej mamy przykład różnic pomiędzy narzędziami dla LLM do interakcji z aplikacją <a href="https://linear.app/">Linear</a> porównanych z natywnymi funkcjonalnościami API. Akcje takie jak <code>delete_project</code> nie zostały zaimplementowane ponieważ zwykle nie będziemy dawać możliwości usuwania całych projektów agentowi. Akcje takie jak <code>add_label</code> nie zostały uwzględnione ponieważ byłyby wykorzystywane ekstremalnie rzadko. Ich pominięcie redukuje niepotrzebny &quot;szum&quot; w kontekście, co przekłada się na wyższą skuteczność działania LLM. Zatem jeśli niektóre akcje podejmowane są rzadko i możemy wykonać je samodzielnie w aplikacji, to nie ma potrzeby budować z nich narzędzi dla modelu.</p>
+<p><img src="https://cloud.overment.com/2026-01-22/ai_devs_4_mapping-66b46896-e.png" alt="Przykład niebezpośredniego mapowania narzędzi LLM na podstawie API"></p>
+<p>Wybór które elementy API mają być dostępne jako narzędzia dla LLM to nie jedyna decyzja jaką musimy podjąć. Niekiedy uzasadnione będzie <strong>połączenie</strong> bądź <strong>rozdzielenie</strong> akcji dostępnych w API. Skoro jesteśmy już przy Linear, to aplikacja ta posiada różne <strong>statusy, etykiety, zespoły oraz podział na projekty</strong>. Przy zarządzaniu wpisami zwykle potrzebujemy identyfikatorów dla tych poszczególnych elementów. Problem w tym, że API udostępnia je jako oddzielne zasoby, co z programistycznego punktu nie jest problemem, ale z perspektywy AI przekłada się na dodatkowe, zbędne kroki. Dlatego zamiast udostępniać kilka narzędzi, możemy zamknąć je w jedno, np. <code>workspace_metadata</code>.</p>
+<p><img src="https://cloud.overment.com/2026-01-22/ai_devs_4_unified_tools-0da2d4fc-d.png" alt="Przykład połączenia wielu zasobów API w jedno narzędzie"></p>
+<p>Narzędzie <code>workspace_metadata</code> nie jest jednak wyłącznie <strong>połączeniem</strong> kilku różnych zasobów API. Jest <strong>konfigurowalnym połączeniem</strong>, ponieważ model może zdecydować o tym, jakich informacji potrzebuje w danym momencie bez konieczności pobierania całego zestawu danych.</p>
+<p>Wyłaniają nam się teraz zasady, którymi powinniśmy kierować się przy budowaniu narzędzi. Reguły te mówią, że:</p>
+<ul>
+<li>Narzędzia powinny być zrozumiałe dla osoby, która nie posiada jakiejkolwiek wiedzy na temat naszego systemu ani dostępu do aktualnej dokumentacji.</li>
+<li>Nazwa narzędzia powinna być możliwie unikatowa i mieć niską szansę na kolizję z innymi narzędziami. Np. „send” jest gorszą nazwą niż „send_email”.</li>
+<li>Opisy narzędzi powinny charakteryzować się wysokim wskaźnikiem signal-to-noise. Powinny być zwięzłe i zawierać wyłącznie informacje, które zwiększają szansę na to, że model wybierze je w odpowiednim momencie. Choć brzmi to dość ogólnie, staje się to jasne w chwili, gdy przeanalizujemy od 10 do 30 przykładowych zapytań użytkownika.</li>
+<li>Narzędzia powinny być zaprojektowane tak, aby zminimalizować liczbę kroków potrzebnych do wykonania zadania.</li>
+<li>Schematy narzędzi nie muszą obejmować wszystkich możliwych właściwości dostępnych w API. Część z nich może zostać całkowicie pominięta, ponieważ nie odgrywają roli z punktu widzenia modelu. Przykładem są wszelkiego rodzaju hashe, wewnętrzne identyfikatory lub flagi wykorzystywane jedynie w kodzie aplikacji.</li>
+<li>Przy projektowaniu schematów zawsze warto zadać sobie pytania takie jak: &quot;<strong>co model bezwzględnie musi uzupełnić?</strong>&quot;, &quot;<strong>co powinno być uzupełnione programistycznie?</strong>&quot; oraz &quot;<strong>czego model nie może uzupełnić?</strong>&quot;. Np. model nie powinien mieć prawa do zmiany identyfikatora użytkownika, od którego zależą uprawnienia dostępu do zasobu. Coś takiego bezwzględnie musi być kontrolowane po stronie kodu.</li>
+<li>Odpowiedzi zwracane przez narzędzia powinny zawierać minimum niezbędnych informacji oraz wskazówki, które zwiększą szansę na to, że model poprawnie z nich skorzysta.</li>
+<li>Walidacja, paginacja, obsługa błędów oraz komunikaty o błędach muszą stać na najwyższym poziomie. Co więcej, jest to standard wyższy niż ten wymagany od aplikacji, które tworzymy na co dzień. W przypadku agentów posługujących się narzędziami możemy bowiem spodziewać się niemal dowolnych danych. Musimy zatem nie tylko zabezpieczyć się przed taką sytuacją, ale również poprawnie ją obsłużyć, aby model LLM wiedział, jak się w niej odnaleźć.</li>
+</ul>
+<p>Poniższa grafika przedstawia konkretne przykłady opisanych zasad. Niebawem będziemy stosować je także w praktyce, więc szybko staną się dość naturalne i łatwiej będzie je zrozumieć.</p>
+<p><img src="https://cloud.overment.com/2026-01-22/ai_devs_4_mapping-1a8e7f3c-1.png" alt=""></p>
+<h2 id="ustalanie-domyślnych-wartości-walidacji-orazzabezpieczeń">Ustalanie domyślnych wartości, walidacji oraz zabezpieczeń</h2>
+<p>Dobrze zaprojektowane narzędzia dla LLM dążą do tego, aby AI realizowało zadania w jak najmniejszej liczbie kroków przy minimalnym wysiłku. Nawet pomimo tego, że kolejne generacje modeli stają się coraz lepsze w posługiwaniu narzędziami, to i tak ciągle podnosimy poziom trudności rzucając im coraz trudniejsze wyzwania. Już teraz weszliśmy też w fazę w której agenci samodzielnie tworzą dla siebie nowe umiejętności. W tej sytuacji również będzie nam zależało na tym, aby generowane narzędzia były możliwie jak najbardziej skuteczne.</p>
+<p>Ustalanie domyślnych wartości nie jest czymś nowym w kontekście API. Chociażby <a href="https://platform.openai.com/docs/api-reference/responses/create">Responses API</a> ustawia właściwość <code>temperature</code> na 1, więc nie musimy zawsze jej podawać. Z narzędziami dla LLM jest podobnie, ale zdecydowanie bardziej złożone. Bo jeśli API ustala domyślną wartość, która nam nie odpowiada, możemy ją łatwo zmienić w kodzie i mieć pewność, że zawsze otrzymamy wynik w takiej formie, na której nam zależy. W przypadku LLM nie mamy takiej pewności, więc domyślne wartości powinny być starannie przemyślane.</p>
+<p>Kilka przykładów:</p>
+<ul>
+<li>Podczas dostępu wymagającego uwierzytelnienia, przy założeniu, że użytkownik jest już autoryzowany, nie powinniśmy wymagać od modelu podawania identyfikatora. Np. przy tworzeniu nowego zadania w Linear, możemy domyślnie przypisać je do bieżącego użytkownika. Jednocześnie powinniśmy <strong>poinformować model o tym fakcie w opisie narzędzia</strong> oraz <strong>dać możliwość zmiany</strong> (jeśli jest to potrzebne). W podobny sposób można wczytać inne preferencje użytkownika (np. strefy czasowe)</li>
+<li>Domyślne ustawienia filtrowania, sortowania czy formatu wyświetlania powinny być ustawione tak, aby rezultaty były zwracane w formie zawierającej minimum niezbędnych informacji. Model powinien jednak mieć możliwość pobrania szczegółów w razie potrzeby.</li>
+<li>Wszędzie tam gdzie jest to możliwe, powinna istnieć możliwość ustawienia tej samej wartości na więcej niż jeden sposób. Np. Linear dopuszcza, aby przy dodawaniu nowego wpisu etykieta była podana w formie identyfikatora <strong>bądź</strong> nazwy. Oczywiście należy tutaj zwracać uwagę na ewentualne kolizje (nazwa w takiej sytuacji musi być unikatowa).</li>
+<li>Niektóre właściwości lub ustawienia API są dostępne wyłącznie dla użytkowników z określonymi planami subskrypcyjnymi, uprawnieniami lub zależą od preferencji danego konta. W sytuacjach, w których API mogłoby domyślnie zwrócić błąd, w odniesieniu do narzędzi zazwyczaj lepiej jest, o ile to możliwe, dopuścić niedostępne wartości. Należy jednak przy tym poinformować model, że poszczególne opcje nie zostały uwzględnione.</li>
+</ul>
+<p><img src="https://cloud.overment.com/2026-01-22/ai_devs_4_defaults-3e061598-b.png" alt=""></p>
+<p>Także po raz kolejny robimy wszystko, co tylko możliwe, aby ułatwić korzystanie z narzędzia oraz wybaczać niektóre potknięcia. I jeśli już o nich mowa, to przyjrzymy się jeszcze walidacji oraz informacjom o błędach.</p>
+<ul>
+<li>Błędy takie jak &quot;<strong>coś poszło nie tak</strong>&quot; sprawiają duży problem nawet użytkownikom, ale dla modeli językowych oraz agentów AI zwykle oznaczają przekreśloną szansę na ukończenie zadania. Zatem dokładne informacje o błędach powinny stać się dla nas standardem.</li>
+<li>API niekiedy zwraca wyłącznie statusy błędów, np. <code>400 Bad Request</code>, albo <code>403 Forbidden</code>, których znaczenie jest wyjaśnione w dokumentacji. Wiemy już, że agenci AI zwykle nie będą mieć do niej dostępu, więc zawsze poza kodem, musimy dodać jasny opis błędu. Niekiedy przydatne są także wskazówki, np. &quot;Zakres dat jest zbyt duży. Dostępna historia obejmuje maksymalnie (...zakres dat)&quot;.</li>
+<li>Błędy o brakujących właściwościach, np. &quot;<strong>team_id jest wymagany</strong>&quot; mogą być uzupełnione wskazówką dla modelu. &quot;<strong>Identyfikator zespołu (team_id) jest nieprawidłowy. Wskazówka: pobierz go z pomocą akcji 'workspace_metadata', jeśli jest dostępna.</strong>&quot; zdecydowanie zwiększy skuteczność agenta. Dobrze jednak zachować pewną ostrożność, bo nie zawsze mamy pewność, że pozostałe narzędzia będą dostępne dla danego agenta.</li>
+<li>Podobnie jak w przypadku narzędzi CLI, które potrafią reagować na literówki bądź nieobsługiwane aliasy komend, tak samo w przypadku walidacji narzędzi niekiedy możemy domyślić się, że model może próbować ustawić np. status &quot;done&quot; zamiast &quot;completed&quot;. Wówczas wskazówka w stylu &quot;<strong>czy chodziło Ci o ... ?</strong>&quot; może okazać się bezcenna.</li>
+</ul>
+<p>Poniżej znajdują się przykłady prezentujące rekomendowane zasady walidacji z uwzględnieniem LLM. Na ich podstawie można tworzyć własne reguły i zwyczajnie zawsze zadawać sobie pytanie &quot;jak mogę wyjaśnić błędne zapytanie tak, aby zwiększyć szansę na to, że agent AI będzie wiedział co zrobić&quot;.</p>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_validation-7a212262-e.png" alt=""></p>
+<p>W kontekście walidacji, mogą pojawić się także sytuacje w których będziemy chcieli narzucić dodatkowe ograniczenia, ale tylko w sytuacji gdy to agent AI posługuje się naszym API. Przykładem mogą być akcje nieodwracalne, takie jak <strong>wysłanie maila</strong>. Domyślnie akcja ta może umożliwiać przesłanie wiadomości na dowolny adres. Jednak w przypadku modeli językowych może dojść do zwykłej halucynacji w wyniku której wiadomość może trafić w niepowołane ręce. Dobrym pomysłem jest więc <strong>bezwzględne wymaganie potwierdzenia wykonania akcji</strong> przez użytkownika. W przypadku gdy nie jest to możliwe, ale wciąż zależy nam na wysyłaniu maili, możemy wprowadzić programistyczne ograniczenie w postaci dopuszczalnej listy adresów. Takie podejście sprawdzi się szczególnie w kontekście firmowym bądź osobistym, ale tylko dla niektórych scenariuszy.</p>
+<p>Analogicznie, gdy posiadamy informację, że z API korzysta agent, możemy stosować izolację kontekstu. Dzięki niej agent początkowo ma dostęp do różnych kategorii zasobów, lecz w ramach jednej sesji może korzystać wyłącznie z jednej z nich.</p>
+<p>W praktyce, możemy także spotkać sytuacje gdzie niemożliwe będzie ani uzyskanie zgody od użytkownika, ani programistyczne ograniczenie dostępu. Wówczas możemy zbudować narzędzie posiadające wbudowany tryb <strong>dry-run</strong>. Pozwala on agentowi na sprawdzenie, czy wprowadzane zmiany są zgodne z założeniami. Jeśli tak, agent może wznowić wykonanie akcji z takimi samymi argumentami. Co prawda wówczas polegamy wyłącznie na ocenie modelu, ale w przypadku najnowszych LLM możemy spodziewać się znaczącego obniżenia ryzyka błędu (choć go nie eliminujemy).</p>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_constraints-b55f9156-5.png" alt="Przykłady dodatkowych zabezpieczeń akcji, uwzględnionych wyłącznie dla kontekstu AI"></p>
+<h2 id="połączenie-modelu-zusługami-przez-api-proxy-orazcli">Połączenie modelu z usługami przez API, proxy oraz CLI</h2>
+<p>W sieci można spotkać opinie, a nawet projekty sugerujące, że bezpośrednie połączenie LLM z API to wszystko, czego potrzebują agenci. Myślę jednak, że powyższe przykłady jasno wskazują, iż automatyczne mapowanie istniejącego API do struktury narzędzi agentów nie jest dobrym pomysłem. Powodem w jednym zdaniu jest <strong>brak wystarczającego kontekstu</strong>, który nawet człowiekowi utrudnia bądź niekiedy uniemożliwia skorzystanie z API <strong>bez dostępu do jego dokumentacji</strong>.</p>
+<p>Automatyzacja tłumaczenia API na schematy narzędzi dla AI jest teoretycznie możliwa poprzez zaangażowanie modeli LLM. Wówczas nie mówimy o bezpośrednim mapowaniu interfejsu, lecz o możliwości zastosowania zasad, o których wspominaliśmy przed chwilą. Niestety w praktyce, przynajmniej w przypadku obecnych modeli, trudno mówić o pełnej automatyzacji, a nadzór człowieka nadal pozostaje niezbędny. Zatem API może zostać dopasowane do LLM, ale w przypadku istniejących projektów może być to niezwykle trudne bądź wprost niemożliwe.</p>
+<p>Gdy istniejące API jest poprawnie zaimplementowane (np. API Linear), możemy zbudować proxy, czyli warstwę stojącą pomiędzy API a LLM. Przykłady elementów takiego proxy widzieliśmy powyżej przy okazji omawiania różnic pomiędzy narzędziami LLM, a API Linear gdzie blokowaliśmy bądź łączyliśmy niektóre akcje. Także jeśli nie mamy możliwości wprowadzać znaczących zmian w istniejących interfejsach, stworzenie proxy jest bardzo wskazane. Rolę takiego proxy wprost odgrywają tzw. Serwery MCP (Model Context Protocol) o których będziemy jeszcze mówić.</p>
+<p>Łączenie LLM z narzędziami możliwe jest także poprzez narzędzia CLI, np. <a href="https://github.com/vercel-labs/agent-browser">agent-browser</a>. Agent AI posiadający dostęp do terminala może wykonywać polecenia w zakresie swoich uprawnień. Dodatkowo wywołanie flagi --help zazwyczaj jest wystarczające, aby dowiedzieć się wszystkiego na temat danej akcji. Problem w tym, że zastosowanie narzędzi CLI na skali, poza urządzeniem użytkownika, jest dość trudne.</p>
+<p>Oczywiście mamy wiele przykładów narzędzi CLI funkcjonujących w ramach naszych aplikacji. Np. ffmpeg, pandoc, wkhtmltopdv, magick i inne. Jednak jeśli nasz agent ma się łączyć z zewnętrznymi usługami takimi jak Google Maps, Stripe czy Pipedrive, które będą zarządzane z poziomu aplikacji działającej na serwerze, to budowanie CLI przyniesie nam więcej problemów niż korzyści.</p>
+<p>Dlatego na pytanie <strong>&quot;Czy lepsze jest API, MCP czy CLI?&quot;</strong> odpowiedź będzie uzależniona od kontekstu i rodzaju integracji. Nie ma tutaj jednej ścieżki, ale warto znać zalety oraz wady każdego z tych podejść. Główne różnice znajdują się na poniższej grafice i obejmują:</p>
+<ul>
+<li><strong>API:</strong> to scenariusz w którym model podłącza się bezpośrednio do danej usługi na przykład poprzez pisanie i uruchamianie poleceń CURL bądź prostych skryptów. Tutaj nie mamy praktycznie żadnej kontroli nad tym, co robi model. W dodatku agent potrzebuje tutaj dostęp do dokumentacji, którą musi samodzielnie eksplorować, co jest bardzo nieefektywne.</li>
+<li><strong>CLI:</strong> to sytuacja gdy agent posiada dostęp do terminala i aplikacji CLI. W przeciwieństwie do API, niezbędne informacje może uzyskać poprzez flagę --help. W dodatku agent może korzystać z pełnej elastyczności terminala, co pozwala na przykład na łączenie ze sobą różnych akcji. W przeciwieństwie do API, agent porusza się tutaj wyłącznie po interfejsie, który został mu udostępniony.</li>
+<li><strong>Function Calling / MCP:</strong> to &quot;paczka&quot; zawierająca zestaw narzędzi. Skorzystanie z nich <strong>nie wymaga</strong> dostępu do terminala, co zwiększa kontrolę nad zachowaniem agenta, ale jednocześnie ogranicza jego możliwości.</li>
+</ul>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_api_mcp_cli-ecf38a22-d.png" alt=""></p>
+<p>Zaznaczę tylko, że <strong>MCP</strong> w podświetlonym bloku nie oznacza konieczności korzystania z Model Context Protocol. Równie dobrze mogą to być dedykowane narzędzia Function Calling wbudowane w logikę aplikacji. Poza tym, powyższe opcje nie są jedynymi, ponieważ do dyspozycji mamy jeszcze <a href="https://www.anthropic.com/engineering/code-execution-with-mcp"><strong>Code Execution</strong></a>, ale o nim oraz o samym MCP powiemy sobie nieco później.</p>
+<h2 id="personalizacja-narzędzi-dzięki-augmented-function-calling">Personalizacja narzędzi dzięki Augmented Function Calling</h2>
+<p>Sporo powiedzieliśmy na temat projektowania schematów &quot;input / output&quot; narzędzi. Można o tym myśleć jak o samodzielnym &quot;pakiecie&quot; zawierającym komplet informacji potrzebnych do korzystania z niego.</p>
+<p>Gdy zaczniemy pracować z takimi narzędziami, szybko zauważymy potrzebę dostarczania dodatkowych instrukcji, które wyjaśnią agentowi AI to, <strong>jak my chcemy</strong>, aby z nich korzystał.</p>
+<p>Załóżmy, że mamy narzędzie do <strong>generowania i edycji obrazów</strong> integrujące się z API Gemini. Agent AI może je uruchomić, aby stworzyć obraz zgodny z opisem użytkownika. Jednak gdy proces ten z jakiegoś powodu musi stać się powtarzalny, to każdorazowe dostarczanie pełnej instrukcji staje się uciążliwe. Wówczas dobrym pomysłem staje się <strong>wzbogacenie promptu użytkownika</strong> o wcześniej ustaloną treść. Można to określić mianem <strong>Augmented Function Calling</strong>.</p>
+<p>Poniżej widzimy jak zapytanie &quot;robot head&quot; zostało zamienione na generyczną grafikę prezentującą głowę robota. Natomiast w drugim przypadku zapytanie użytkownika jest takie samo, lecz agent AI bierze pod uwagę dodatkową instrukcję opisującą pożądany styl. W rezultacie druga grafika jest szkicem pasującym do tego stylu.</p>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_augmented_tool_use-d76687f8-2.png" alt="Przykład działania narzędzi bez kontekstu oraz ze spersonalizowanym kontekstem"></p>
+<p>Chodzi więc tutaj o <strong>dodatkowe informacje w kontekście interakcji</strong>, które wpływają na zachowanie modelu. Proces ten może mieć różne formy i zwykle występuje pod nazwami takimi jak <strong>Commands</strong>, <strong>Skills</strong> bądź po prostu <strong>Prompts</strong>. Na co dzień możemy je spotkać w narzędziach takich jak Open Code czy Cursor.</p>
+<p>Te dodatkowe instrukcje mogą być dołączone do kontekstu na kilka sposobów:</p>
+<ul>
+<li><strong>Statycznie:</strong> czyli przez bezpośrednie działanie użytkownika, np. uruchomienie komendy czy przyciski.</li>
+<li><strong>Dynamicznie:</strong> czyli to model decyduje o uruchomieniu umiejętności. Odbywa się to na tej samej zasadzie, co w przypadku wszystkich narzędzi, czyli <strong>nazwy</strong> oraz <strong>opisu</strong>.</li>
+<li><strong>Hybrydowo:</strong> czyli zarówno w wyniku bezpośredniej akcji użytkownika bądź decyzji agenta.</li>
+</ul>
+<p><strong>Wzbogacanie wywołań narzędzi</strong> może obejmować nie tylko pojedyncze uruchomienie akcji, lecz całą ich serię. Poza tym, agent może otrzymać możliwość nie tylko <strong>aktywowania</strong>, ale też <strong>dezaktywowania</strong> danej umiejętności, a także narzędzia do ich <strong>tworzenia</strong> czy <strong>aktualizacji</strong>.</p>
+<h2 id="zasady-projektowania-workflow-orazlogiki-agentów">Zasady projektowania workflow oraz logiki agentów</h2>
+<p>Model językowy wyposażony w narzędzia może pracować zgodnie z narzuconym schematem i realizować kolejne etapy zadań jeden po drugim. Zwykle określa się to jako &quot;Workflow&quot;. Pomimo raczej sztywnej struktury obecność modelu LLM sprawia, że taka logika może obsługiwać nawet skomplikowane procesy, a jednocześnie pozostawać relatywnie przewidywalna. Workflow może mieć różne formy, od prostego łańcucha akcji następujących po sobie, przez rozgałęzione scenariusze obejmujące nawet równoległe wykonanie akcji. Niezależnie od struktury, mówimy tutaj o z góry ustalonych komponentach, które mogą wziąć udział w wykonaniu zadania.</p>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_chain-1c59a279-a.png" alt="Przykład AI Workflow - Chain"></p>
+<p>Gdy model językowy zostaje uruchomiony w pętli zapytań, w ramach której decyduje o kolejnych krokach, takich jak wywołania narzędzi czy kontakt z użytkownikiem, wówczas spełnia on definicję <strong>agenta AI</strong>. Agenci, w przeciwieństwie do zwykłych programów komputerowych, wyróżniają się tym, że są w stanie potencjalnie rozwiązywać problemy, z myślą o których nie musieli być bezpośrednio projektowani. Przykładowo agent wyposażony w narzędzia <strong>filesystem</strong>, <strong>websearch</strong> oraz <strong>email</strong> może gromadzić informacje z wybranych stron internetowych i zapisywać je w plikach. Nie będzie miał on również trudności z odczytaniem wiadomości e-mail oraz znalezieniem informacji na temat ich autorów czy firm, w których te osoby pracują. To właśnie ta elastyczność sprawia, że koncepcja agenta AI jest tak atrakcyjna i wzbudza zainteresowanie. Jednocześnie wiąże się ona z niepewnością dotyczącą powtarzalności oraz skuteczności realizowanych zadań.</p>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_agent-d6370cf4-e.png" alt="Przykładowa pętla logiki agenta"></p>
+<p>Budowanie aplikacji w których logice pojawiają się modele generatywnej sztucznej inteligencji to nadal w ~80% te same aktywności, które znamy z klasycznych aplikacji. Jednak te 20% przedstawia zupełnie nową klasę problemów na których część nadal nie znamy odpowiedzi. Jednocześnie niektóre problemy agentów z którymi spotykaliśmy się jeszcze kilka miesięcy temu, dziś przestają być aktualne lub całkowicie znikają.</p>
+<p>Pojawia się więc pytanie: <strong>Jak budować logikę &quot;workflow&quot; oraz &quot;agenta AI&quot;?</strong></p>
+<p>Spróbujemy teraz na nie odpowiedzieć, patrząc na ten temat z szerokiej perspektywy architektury. Mowa tutaj o:</p>
+<ul>
+<li>Logice aplikacji realizującej zapytania do LLM oraz zewnętrznych usług</li>
+<li>Modelu bądź modelach językowych sterujących logiką interakcji</li>
+<li>Narzędziach umożliwiających modelowi interakcję z otoczeniem</li>
+<li>Systemach pamięci krótkoterminowej oraz długoterminowej</li>
+<li>Zestawem instrukcji określających zachowanie modelu, a także umiejętnościom</li>
+</ul>
+<p>Aktualnie mówi się także o <strong>Agent Harness</strong>, czyli nie tylko głównym komponentach samego agenta, ale całym systemie na który składają się także system plików, sandbox do wykonywania kodu, mechaniki zarządzania kontekstem, pamięcią, komunikacji pomiędzy agentami czy obserwacją całego systemu. Całość prezentuje się tak, jak poniżej.</p>
+<p><img src="https://cloud.overment.com/2026-01-23/ai_devs_4_agent_harness-0fed8955-3.png" alt="Agent Harness"></p>
+<p>Niezależnie od tego czy budujemy Workflow czy Agentów, będziemy korzystać ze wszystkich bądź tylko wybranych komponentów. Jak wspomniałem, całość bardzo przypomina klasyczne aplikacje i tylko niewielka część wprost dotyczy AI. Natomiast kluczową różnicę stanowi fakt, że działaniem aplikacji w dużym stopniu zarządza model językowy. Sprawia to, że system musi być znacznie bardziej dopracowany, o czym zresztą przekonaliśmy się już przy okazji rozmów o narzędziach dla LLM.</p>
+<p>Poza zrozumieniem architektury generatywnych aplikacji, dobrze jest też kształtować umiejętność oceny tego, kiedy wybrać Workflow, a kiedy Agenta AI. Tym bardziej, że w sieci często można spotkać opinie sugerujące, że tylko jedno z tych podejść jest użyteczne. Podczas gdy w praktyce, nierzadko okazuje się, że stosowanie jakiegokolwiek nie jest dobrym pomysłem.</p>
+<ul>
+<li><strong>100% skuteczności</strong>: jeśli przewidywalność i stabilność jest fundamentalnie ważna, korzystanie z LLM jest <strong>raczej złym pomysłem</strong> o ile do gry nie wchodzi nadzór ze strony człowieka i/lub jasne wskaźniki sukcesu.</li>
+<li><strong>Struktura</strong>: jeśli dany proces jest dokładnie ustrukturyzowany i rzadko się zmienia, to wówczas angażowanie logiki agenta mija się z celem. Skupienie się na poszczególnych etapach przyniesie więcej korzyści niż próby pełnej stabilizacji działań agenta.</li>
+<li><strong>Otwarte problemy:</strong> choć tutaj na myśl od razu przychodzą agenci AI, tak nie powinniśmy skupiać się wyłącznie na nich. Niekiedy lepszym pomysłem jest zawężenie zakresu i zmiana otwartych problemów na kilka zamkniętych.</li>
+<li><strong>Reagowanie na zmiany:</strong> dopiero w przypadkach gdy jasno widzimy przewagi elastyczności charakteryzującej agentów, powinniśmy całą uwagę skupić na zaprojektowaniu odpowiednich narzędzi oraz ich głównej logiki.</li>
+</ul>
+<p>Choć z powyższych punktów wyłaniają się w miarę jasne schematy myślenia, tak dobrze jest je opanować po to, aby na pewnym etapie wprost je kwestionować. Bo może się okazać, że agent sprawdzi się lepiej w przypadku stabilnych i jasno zdefiniowanych procesów, ponieważ jego dynamiczne cechy wniosą dodatkową wartość, np. wynikającą z połączenia zewnętrznych źródeł danych.</p>
+<p>W dalszych lekcjach AI_devs będziemy zajmować się poszczególnymi obszarami powyższego schematu &quot;Agent Harness&quot;.</p>
+<h2 id="refleksja-orazinterpretacja-zapytań-wdynamicznym-kontekście">Refleksja oraz interpretacja zapytań w dynamicznym kontekście</h2>
+<p>Większość modeli językowych, które obecnie mamy do dyspozycji charakteryzuje tzw. reasoning polegający na generowaniu dodatkowych tokenów przed udzieleniem odpowiedzi bądź podjęciem działania. Niekiedy nawet używa się określenia Large Reasoning Model (LRM).</p>
+<p>Etap rozumowania realnie wpływa na skuteczność modelu i tym samym logiki agentów, aczkolwiek niektórzy mają co do tego wątpliwości. &quot;<a href="https://arxiv.org/pdf/2505.17813">Don’t Overthink it</a>&quot; sugeruje, reasoning negatywnie wpływa na proste zadania, a &quot;<a href="https://arxiv.org/pdf/2402.08939">Premise Order Matters</a>&quot;, że samo rozumowanie może być jedynie iluzją, ponieważ nawet zmiana kolejności informacji w prompcie potrafi obniżyć skuteczność modelu o nawet 40%.</p>
+<p>W praktyce obserwujemy jednak realny wzrost skuteczności LLM, gdy tryb rozumowania jest włączony oraz ustawiony na wyższe wartości. Bo API zwykle pozwala nam kontrolować czas trwania refleksji, albo poprzez określenie budżetu tokenów bądź poziomu &quot;wysiłku&quot; włożonego w ten proces. Samo rozumowanie od strony technicznej różni się też w zależności od providera z którym aktualnie pracujemy. Przykładowo OpenAI udostępnia jedynie skróconą wersję &quot;przemyśleń&quot; modelu, a ich oryginalna treść jest automatycznie usuwana z kontekstu konwersacji.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_reasoning-3619585a-c.png" alt=""></p>
+<p>Choć automatyczne rozumowanie w LLM samo w sobie zwykle działa w imponujący sposób, tak w przypadku agentów AI będziemy angażować się w ten proces nieco bardziej, ale też nie będziemy chcieli sterować nim całkowicie, aby uniknąć narzucania niepotrzebnych ograniczeń. Przykładowo:</p>
+<ul>
+<li><strong>Planowanie:</strong> wśród narzędzi dostępnych dla agenta możemy uwzględnić <strong>listę zadań</strong> i zachęcić LLM w instrukcji systemowej, aby przed rozpoczęciem pracy nad złożonym problemem, rozbił je na mniejsze kroki. Poza tworzeniem listy, agent powinien mieć możliwość jej aktualizowania. Lista zadań pełni istotną rolę szczególnie przy wieloetapowych interakcjach, ponieważ każdorazowe jej aktualizowanie &quot;przypomina&quot; modelowi o najważniejszych wątkach.</li>
+<li><strong>Odkrywanie:</strong> wczytanie wszystkich możliwych informacji do kontekstu, na przykład z bazy wiedzy, nie jest obecnie możliwe. Stosujemy więc różne formy pamięci długoterminowej, opartej chociażby na systemie plików. Eksplorowanie zapisanych wspomnień wymaga posługiwania się narzędziami, co nie jest możliwe na samym etapie rozumowania. Co więcej, model może &quot;nie wiedzieć, że coś wie&quot;, musimy więc poprowadzić go przez proces odkrywania posiadanych informacji.</li>
+<li><strong>Przekierowanie:</strong> czasami będzie nam zależało na zarządzaniu uwagą agenta, czy to na podstawie klasyfikacji zapytania, czy poprzez deterministyczne informacje o jego bieżącym stanie. Jednym z przykładów jest sytuacja, w której agent otwiera przeglądarkę podczas wykonywania zadań. Stanowi to jasną informację, że jego aktualny kontekst powinien skupić się wyłącznie na jej obsłudze.</li>
+<li><strong>Uśrednianie</strong>: nikt nie powiedział, że etap refleksji musi ograniczać się do jednego modelu. Zaangażowanie więcej niż jednego LLM jest porównywalne z uzyskaniem perspektywy od kilku różnych osób. Następnie połączenie rezultatów, na przykład poprzez ich uśrednienie bądź głosowanie, nierzadko prowadzi do znacznego podniesienia skuteczności agentów.</li>
+</ul>
+<p>Zarządzanie procesem rozumowania i refleksji modelu będzie pojawiać się jeszcze niejednokrotnie w dalszych lekcjach. Teraz wystarczy zapamiętać, że sam &quot;reasoning&quot; modeli to nie wszystko, a zachowanie modelu może być sterowane na różne sposoby, ale też nie powinno narzucać zbyt sztywnych ograniczeń.</p>
+<h2 id="transformacja-orazwzbogacanie-zapytań-przez-llm">Transformacja oraz wzbogacanie zapytań przez LLM</h2>
+<p>Z transformacjami zapytań HTTP spotykamy się na co dzień i zazwyczaj nie ma problemu ze zmianą formatu czy wzbogaceniem obiektu żądania. Jednak w przypadku agentów AI transformacje nie zawsze są oczywiste, ponieważ mamy do czynienia z językiem naturalnym i zwykle bardzo dynamicznym kontekstem.</p>
+<p>Aby zrozumieć, na czym polega wyzwanie, spójrzmy na poniższy schemat interakcji, w której agent AI zostaje poproszony o odnalezienie informacji w bazie wiedzy. Oryginalne zapytanie użytkownika jest ogólne, ale zarazem potencjalnie wystarczające do powiązania go z zawartością przechowywanych dokumentów.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_query_transformation-c76cc21e-4.png" alt=""></p>
+<p>Jeśli przyjrzymy się bliżej, zobaczymy, że pomiędzy zapytaniem użytkownika a zawartością pliku nie występuje bezpośrednie dopasowanie słów kluczowych. Dopiero dzięki transformacji zapytania poprzez wykorzystanie synonimów oraz powiązanych zagadnień, agent był w stanie dotrzeć do właściwego dokumentu.</p>
+<p>Transformacja zapytań nie zawsze będzie skuteczna, jeśli będziemy opierać ją wyłącznie na natywnej wiedzy modelu. Najczęściej będziemy mieli do czynienia z dokumentami dotyczącymi indywidualnego kontekstu klienta. Oznacza to, że bez przynajmniej ogólnej wiedzy na temat ich zawartości model nie będzie w stanie skutecznie po nich nawigować.</p>
+<p>Poniżej widzimy jeden z takich scenariuszy. Zapytanie użytkownika dotyczy „tematów omówionych w pierwszym tygodniu” i choć istnieje prawdopodobieństwo, że agent zorientuje się, że chodzi o pliki <code>ai_devs/S01E0*.md</code>, raczej nie powinniśmy na to liczyć. Jeśli jednak agent otrzyma informację, że przed eksploracją dostępnych zasobów ma przeczytać automatycznie generowany plik <code>_index.md</code>, szansa na to, że nawigowanie po bazie wiedzy będzie skuteczne, zdecydowanie rośnie.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_context_based_transformation-cd67deaf-a.png" alt=""></p>
+<p>Kolejną kwestią wartą uwagi jest <strong>poprawne rozpoznanie</strong> tego, czy pytania użytkownika w ogóle dotyczą bazy wiedzy. Jest to skomplikowane zwłaszcza wtedy, gdy agent posiada dostęp do więcej niż jednego narzędzia dostarczającego zewnętrzny kontekst, takiego jak &quot;<strong>web_search</strong>&quot;. Wówczas najlepszym rozwiązaniem będzie zwrócenie uwagi agenta na to, aby <strong>zadawał pytania doprecyzowujące</strong> przed rozpoczęciem eksploracji.</p>
+<p>Dodatkowe instrukcje obsługi narzędzi mogą pomagać, lecz mogą również negatywnie wpływać na zachowanie agenta, zwłaszcza gdy stają się zbyt skomplikowane lub szczegółowe. Z tego powodu lepszym rozwiązaniem jest przechowywanie „mapy treści” w plikach zewnętrznych zamiast w instrukcji systemowej.</p>
+<h2 id="techniki-optymalizacji-szybkości-iskuteczności-narzędzi">Techniki optymalizacji szybkości i skuteczności narzędzi</h2>
+<p>Każda kolejna akcja wykonywana przez agenta AI oznacza kolejne zapytanie do LLM, a co za tym idzie, również przesłanie dotychczasowego kontekstu. Jeśli w danej turze agent zdecyduje się na skorzystanie z narzędzi, musimy doliczyć także czas reakcji zewnętrznych usług, który w przypadku na przykład generowania grafik może trwać nawet kilka minut. Ale nawet jeśli czas odpowiedzi zewnętrznych usług jest mały, to i tak każdy kolejny krok znacznie wydłuża czas odpowiedzi agenta.</p>
+<p>Główne obszary, które w tym kontekście powinny zwrócić naszą uwagę to:</p>
+<ul>
+<li><strong>Cache Promptu:</strong> jest to <a href="https://arxiv.org/abs/2311.04934">priorytet</a>. Providerzy, np. <a href="https://ai.google.dev/gemini-api/docs/caching?hl=en&amp;lang=python">Gemini</a> czy <a href="https://platform.openai.com/docs/guides/prompt-caching">OpenAI</a> oferują automatyczne cache'owanie promptu, o ile ten nie ulega zmianie pomiędzy zapytaniami. Cache nie tylko redukuje koszty, ale przede wszystkim <strong>znacząco zmniejsza tzw. &quot;Time to First Token (TTFT)&quot;</strong>, czyli czas reakcji.</li>
+<li><strong>Error Rate</strong>: skoro każdy krok agenta oznacza kolejne zapytanie do LLM, najbardziej logiczne jest ograniczenie tych zapytań do minimum. Jest to oczywiste, lecz biorąc pod uwagę to, co powiedzieliśmy do tej pory na temat budowania narzędzi dla LLM, niekoniecznie proste do osiągnięcia.</li>
+<li><strong>Połączenie akcji:</strong> widzieliśmy to już na przykładzie Linear, gdzie <code>workspace_metadata</code> umożliwia dostęp do danych, które normalnie wymagałyby kilku kroków.</li>
+<li><strong>Równoległe zapytania:</strong> większość providerów API oferuje &quot;parallel function calling&quot;, dzięki czemu nieuzależnione od siebie akcje, mogą być wykonane równolegle. Równie pomocne jest projektowanie narzędzi tak, aby pozwalały na np. edytowanie więcej niż jednego rekordu jednocześnie.</li>
+<li><strong>Zmiana modelu:</strong> nie każde zadanie będzie wymagało zaangażowania najmocniejszego i zwykle najwolniejszego modelu. Wszędzie tam, gdzie tylko pojawia się taka możliwość, powinniśmy sięgać po mniejsze modele.</li>
+<li><strong>Ograniczenie kontekstu:</strong> korzystanie z prompt cache nie zawsze będzie możliwe, szczególnie na początku interakcji. Wówczas długość kontekstu jest jednym z głównych czynników wpływających na czas reakcji modelu, dlatego zależy nam na ograniczeniu go do niezbędnego minimum.</li>
+<li><strong>Ograniczenia wypowiedzi:</strong> generowanie każdego kolejnego tokenu zajmuje czas, więc wszędzie tam gdzie jest to możliwe, powinniśmy kierować modelem tak, by unikał zbędnego przedłużania wypowiedzi. Największą korzyść daje tutaj także sposób przekazywania informacji pomiędzy narzędziami. Na przykład jeśli jedno narzędzi zwraca nam treść raportu, a drugie wysyła je e-mailem, to domyślnie model musi wygenerować tę treść dwukrotnie. Ale jeśli pierwsze narzędzie zapisze raport w pliku, a drugie doda go jako załącznik wiadomości, to mówimy skracamy czas realizacji zadania mniej więcej o połowę!</li>
+</ul>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_optimization-8a52441d-2.png" alt="Przykłady optymalizacji obsługi narzędzi"></p>
+<h2 id="podstawy-zarządzania-kontekstem-w-workflow-i-logice-agentów">Podstawy zarządzania kontekstem w workflow i logice agentów</h2>
+<p>Context Engineering odnosi się do technik dążących do budowania oraz utrzymania wysokiej jakości kontekstu w interakcji z agentami AI i może odnosić się do dwóch różnych obszarów:</p>
+<ul>
+<li>Zarządzania kontekstem przy pracy z Claude Code czy Open Code. Wówczas mówimy o aktywnościach użytkownika, związanych np. z restartowaniem konwersacji i przenoszeniem informacji pomiędzy wątkami. <strong>Tym obszarem nie będziemy zajmować się w AI_devs</strong>.</li>
+<li>Zarządzanie kontekstem <strong>w logice aplikacji</strong> odbywa się poprzez kontrolowanie przebiegu interakcji, zarządzanie dostępnymi narzędziami oraz ich rezultatami, a także komunikację pomiędzy agentami. Jest to zupełnie inna kategoria problemów niż zarządzanie kontekstem podczas kodowania z AI. To właśnie na niej skupimy się w tej i kolejnych lekcjach.</li>
+</ul>
+<p>Dotychczas zewnętrzny kontekst dołączaliśmy do konwersacji jako część promptu systemowego. Obecnie wiemy, że nadal może być to odpowiednie miejsce, o ile dane te nie zmieniają się w trakcie interakcji, co skutkowałoby natychmiastową utratą cache'u. W przypadku agentów AI problem ten rozwiązuje się poniekąd samoistnie, ponieważ zewnętrzny kontekst jest wczytywany przez narzędzia trafiające naturalnie do najnowszych fragmentów wątku. Nadal musimy jednak uważać na dynamiczne dane w instrukcji systemowej, gdyż nawet dodanie informacji o bieżącej dacie oraz godzinie może mieć krytyczny wpływ na wydajność całego systemu.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_dynamic_context-67f5d208-5.png" alt="Dynamiczne elementy instrukcji systemowej i wpływ na prompt cache"></p>
+<p>Poza stabilnością instrukcji systemowej, niezmienne powinny pozostawać także elementy dotychczasowej sesji - wiadomości użytkownika, asystenta oraz wywołania narzędzi. Problem w tym, że dość szybko możemy dojść do limitów okna kontekstowego, co uniemożliwi dalszą interakcję. Jeszcze do niedawna rekomendowane było stosowanie &quot;pływającego okna kontekstu&quot;, czyli usuwanie najstarszych wiadomości. Teraz wiemy, że lepiej utrzymać je w kontekście i zachować cache, niż oszczędzać tokeny przez ucinanie wątku, ale nie rozwiązuje to problemu limitu okna kontekstowego.</p>
+<p>Narzędzia takie jak Claude Code czy Cursor na bieżąco monitorują wykorzystanie okna kontekstowego. Gdy wątek zbliża się do limitu, uruchamiana jest funkcja auto-compact, czyli podsumowanie. Jest to forma kompresji, więc część informacji zostanie utracona o ile oryginalna część wątku nie zostanie zapisana na przykład w formie pliku tekstowego, który agent będzie mógł eksplorować w razie potrzeby.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_thread_context_management-ea50a552-a.png" alt="Porównanie technik zarządzania kontekstem - pływające okno vs kompresja i filesystem"></p>
+<p>Tworzenie plików przechowujących kontekst, do których agent ma dostęp, pojawia się tutaj po raz kolejny. Wcześniej wspominaliśmy o tym przy okazji przenoszenia treści pomiędzy narzędziami (generowanie i wysyłanie raportu), lecz wtedy agent mógł jedynie wskazać konkretny dokument. Nic nie stoi na przeszkodzie, aby w przypadku narzędzi również umożliwić mu pełną eksplorację tych plików. Wówczas np. narzędzie <code>web_search</code> mogłoby zwracać rozbudowane rezultaty, ale agent wczytywałby do kontekstu jedynie istotne dla niego fragmenty.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_tool_results_as_files-999f9f03-e.png" alt="Przykład zapisywania wyników działania narzędzi w formie plików dostępnych dla agenta"></p>
+<p>Na ten moment w temacie Context Engineeringu to wszystko. Zatem w tej chwili musimy zapamiętać, że <strong>prompt cache to priorytet</strong>, a <strong>system plików</strong> znacznie zwiększa elastyczność nawigacji po nawet bardzo rozbudowanych konwersacjach.</p>
+<h2 id="dynamiczne-listy-narzędzi-izasobów-wiedzy">Dynamiczne listy narzędzi i zasobów wiedzy</h2>
+<p>W temacie zarządzania kontekstem łatwo zauważyć, że istotnym problemem szybko stają się narzędzia, których schematy nie tylko zużywają część limitu, lecz także rozpraszają uwagę modelu. Co gorsza, narzędzia są wczytywane nawet wtedy, gdy nie mamy potrzeby ich uruchamiać.</p>
+<p>Na ten moment wystarczy abyśmy dążyli do tego, aby dany agent posiadał dostęp do nie więcej niż 10-15 narzędzi. Ich dynamiczne wczytywanie bez wpływu na <strong>prompt cache</strong> jest aktualnie możliwe tylko w przypadku <a href="https://www.anthropic.com/engineering/advanced-tool-use">Anthropic</a>. Natomiast pracując z innymi providerami musimy skorzystać z innych technik i na tym etapie wystarczy wiedzieć, że chodzi między innymi o:</p>
+<ul>
+<li>stosowanie sub-agentów z których każdy posiada dostęp do indywidualnych umiejętności oraz działa w osobnych oknach kontekstowych, ale z możliwością łatwej wymiany informacji z innymi agentami, np. poprzez system plików</li>
+<li>stosowanie narzędzi do <strong>uruchamiania kodu</strong>, np. <a href="https://www.daytona.io/">Daytona</a>. Wówczas pozostałe narzędzia (np. kalendarz) mogą mieć formę katalogów i plików, które agent może eksplorować i wykonywać. Wówczas w kontekście na stałe mamy tylko podstawowe narzędzia, więc początkowe wykorzystanie limitu kontekstu jest minimalne. Coś takiego określamy mianem &quot;Progressive Disclosure&quot;.</li>
+</ul>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_subagents_code_sandbox-ffee68d6-2.png" alt="Wizualizacja układu narzędzi dla subagentów oraz code execution"></p>
+<p>Omawiając <strong>wzbogacanie zapytań</strong>, zauważyliśmy problem dotyczący dynamicznego wczytywania zasobów wiedzy. Polega on na tym, że agent <strong>początkowo „nie wie, o czym wie”</strong>. Podobny kłopot występuje przy eksplorowaniu narzędzi. Może to doprowadzić do sytuacji, w której agent uzna, że nie jest w stanie podjąć działania, mimo że w teorii posiada taką możliwość.</p>
+<p>Dlatego niezależnie od tego, czy pracujemy z subagentami, czy z sandboxem do uruchamiania kodu, zawsze powinniśmy zapewnić agentowi przynajmniej podstawowe wskazówki dotyczące dostępnych zasobów lub metod ich odkrywania.</p>
+<h2 id="obsługa-wymaganych-danych-wejściowych-uprawnień-orazzgody">Obsługa wymaganych danych wejściowych, uprawnień oraz zgody</h2>
+<p>Wszystkie działania agenta są <strong>niedeterministyczne</strong>. Nawet gdy użytkownik wprost poprosi o wysłanie wiadomości na wskazany adres e-mail, to i tak może dojść do halucynacji, która wyśle ją do zupełnie innej osoby. Dlatego wszystkie akcje, które są nieodwracalne i mogą wiązać się z podjęciem niepożądanej akcji należy obsługiwać na poziomie graficznego interfejsu użytkownika. Czyli:</p>
+<ul>
+<li>Jeśli agent wymaga od użytkownika podania danych, których nie wolno pomylić, powinniśmy wyświetlić formularz zamiast polegać na tym, że model poprawnie wyodrębni poszczególne wartości z treści wiadomości. Choć obecne modele radzą sobie z tym świetnie, ryzyko błędu wciąż istnieje.</li>
+<li>Jeśli agent decyduje się na wykonanie akcji, użytkownik musi zostać poproszony o jej akceptację, a zgoda powinna opierać się na przyciskach, a nie na wiadomości do modelu. W przeciwnym razie, nawet jeśli użytkownik wprost powie, że zmienił zdanie, AI może zignorować lub błędnie zinterpretować jego prośbę.</li>
+<li>Dostęp do zasobów oraz akcji ograniczonych uprawnieniami musi być obsługiwany na poziomie kodu. Oznacza to, że agent <strong>nie może</strong> samodzielnie ustalać na przykład identyfikatora użytkownika. Podobnie dostęp do systemu plików musi być kontrolowany w taki sposób, aby agenci nie mieli fizycznej możliwości sięgania po dokumenty innych użytkowników.</li>
+</ul>
+<p>Oczywiście w powyższych scenariuszach model nadal ma możliwość decydowania o tym, kiedy dany interfejs zostanie wywołany. Jednak gdy już to zrobi, to użytkownik będzie mieć pewność, że akcja zostanie wykonana dokładnie tak, jak sugeruje to aplikacja.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_permissions-395034b4-7.png" alt="Zarządzanie dostępami, zgodami oraz danymi wejściowymi w deterministyczny sposób"></p>
+<p>Wyjątek stanowią tutaj interfejsy dynamiczne, w przypadku których również może dojść do błędów modelu, który może dodać ukryte pola lub pomylić identyfikatory poszczególnych pól. Warto o tym pamiętać.</p>
+<h2 id="rola-problemu-prompt-injection-orazjailbreakingu">Rola problemu prompt injection oraz jailbreakingu</h2>
+<p>Halucynacje modelu to tylko jeden z problemów związanych z działaniem LLM w logice aplikacji. Znacznie poważniejszym wyzwaniem jest <strong>prompt injection</strong>, czyli zmiana zachowań modelu wbrew instrukcji systemowej, oraz <strong>jailbreaking</strong>, polegający na omijaniu zabezpieczeń wprowadzonych przez providera lub jego twórców.</p>
+<p>Zła wiadomość jest taka, że Prompt Injection to problem <strong>otwarty</strong>, na który obecnie nie ma rozwiązania ani skutecznych technik obrony. Najlepszym przykładem jest wspominany już profil <a href="https://x.com/elder_plinius?lang=en">Pliny the Liberator</a>, który jak dotąd złamał zabezpieczenia wszystkich popularnych modeli językowych. Co więcej na ominięcie ich zabezpieczeń zwykle nie potrzebuje więcej niż 24 godzin.</p>
+<p>Spójrzmy więc na to od praktycznej strony oraz agenta posiadającego do dyspozycji dwa narzędzia: <strong>kalendarz</strong> oraz <strong>email</strong>. Jeśli agent przeglądając pocztę otrzyma wiadomość o treści w stylu &quot;Czy możesz przesłać mi swój plan spotkań na najbliższy tydzień?&quot;, to może dosłownie na nią odpowiedzieć, pobierając wcześniej wydarzenia z kalendarza wraz z kontaktami do osób biorących w nich udział. Problem w tym, że wiadomość może pochodzić od nieautoryzowanego użytkownika.</p>
+<p><img src="https://cloud.overment.com/2026-01-24/ai_devs_4_prompt_injection-dce58564-8.png" alt="Przykład prompt injection w połączeniu z narzędziami agentów"></p>
+<p>Fakt, że nie posiadamy obecnie <strong>jakichkolwiek narzędzi</strong> aby bronić się przed atakami taki jak ten powyżej sprawia, że agenci AI powinni być ograniczeni na poziomie środowiskowym. Z kolei stosowanie ich w obszarach, które mogą doprowadzić do wycieku danych czy podjęcia niepożądanych akcji, w ogóle nie powinno mieć miejsca.</p>
+<p>Choć to wszystko brzmi fatalnie (i w rzeczywistości takie jest), istnieje wiele scenariuszy w których agenci AI mogą swobodnie funkcjonować i pomagać nam w codziennej pracy, bez istotnych ryzyk związanych z problemem Prompt Injection. Po prostu jako programiści powinniśmy mieć na uwadze ten problem i adresować go już na poziomie wczesnych założeń projektu oraz przy kontakcie z biznesem. O tym jednak porozmawiamy nieco później.</p>
+<h2 id="fabuła">Fabuła</h2>
+<p><img src="https://vimeo.com/1169706511" alt="https://vimeo.com/1169706511"></p>
+<h2 id="transkrypcja-filmu-z-fabułą">Transkrypcja filmu z Fabułą</h2>
+<p>&quot;Świetna robota przy numerze piąty!</p>
+<p>Mamy już listę podejrzanych osób i nie jest ona wcale taka długa. Musimy teraz zweryfikować, która z tych osób faktycznie była widziana nieopodal jednej z elektrowni.</p>
+<p>Mamy dostęp do lokalizacji wszystkich elektrowni, które nas interesują. Mamy także dostęp do API, które potrafi zwrócić ostatnie lokalizacje, w których dłużej przebywały osoby obserwowane przez &quot;System&quot;. Mamy też osobne API do sprawdzenia, jakim poziomem dostępu do usług systemu dysponuje taka osoba.</p>
+<p>Znajdź proszę idealnego kandydata, który faktycznie pracuje gdzieś nieopodal elektrowni atomowej i podeślij nam jego dane. Centrala już będzie wiedzieć, co z nim należy zrobić.</p>
+<p>Czekamy na dalsze informacje z Twojej strony.&quot;</p>
+<h2 id="zadanie">Zadanie</h2>
+<p>Musisz namierzyć, która z podejrzanych osób z poprzedniego zadania <strong>przebywała blisko jednej z elektrowni atomowych.</strong> Musisz także ustalić jej <strong>poziom dostępu</strong> oraz informację koło której elektrowni widziano tę osobę. Zebrane tak dane prześlij do <code>/verify</code>. Nazwa zadania to <strong>findhim</strong>.</p>
+<h4 id="skąd-wziąć-dane">Skąd wziąć dane?</h4>
+<ol>
+<li>
+<p><strong>Lista elektrowni + ich kody</strong></p>
+<ul>
+<li>Pobierz JSON z listą elektrowni (wraz z kodami identyfikacyjnymi) z:
+<ul>
+<li><code>https://hub.ag3nts.org/data/tutaj-twój-klucz/findhim_locations.json</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Gdzie widziano konkretną osobę (lokalizacje)</strong></p>
+<ul>
+<li>Endpoint: <code>https://hub.ag3nts.org/api/location</code></li>
+<li>Metoda: <code>POST</code></li>
+<li>Body: <code>raw JSON</code> (nie form-data!)</li>
+<li>Zawsze wysyłasz pole <code>apikey</code> oraz dane osoby (<code>name</code>, <code>surname</code>)</li>
+<li>Odpowiedź: lista współrzędnych (koordynatów), w których daną osobę widziano.</li>
+</ul>
+<p>Przykładowy payload:</p>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;apikey&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tutaj-twój-klucz&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Jan&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;surname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Kowalski&quot;</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+</li>
+<li>
+<p><strong>Jaki poziom dostępu ma wskazana osoba</strong></p>
+<ul>
+<li>Endpoint: <code>https://hub.ag3nts.org/api/accesslevel</code></li>
+<li>Metoda: <code>POST</code></li>
+<li>Body: <code>raw JSON</code></li>
+<li>Wymagane: <code>apikey</code>, <code>name</code>, <code>surname</code> oraz <code>birthYear</code> (rok urodzenia bierzesz z danych z poprzedniego zadania, np. z CSV)</li>
+</ul>
+<p>Przykładowy payload:</p>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;apikey&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tutaj-twój-klucz&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Jan&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;surname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Kowalski&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;birthYear&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1987</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+</li>
+</ol>
+<h4 id="co-masz-zrobić-krok-po-kroku">Co masz zrobić krok po kroku?</h4>
+<p>Dla każdej podejrzanej osoby:</p>
+<ol>
+<li>Pobierz listę jej lokalizacji z <code>/api/location</code>.</li>
+<li>Porównaj otrzymane koordynaty z koordynatami elektrowni z <code>findhim_locations.json</code>.</li>
+<li>Jeśli lokalizacja jest bardzo blisko jednej z elektrowni — masz kandydata.</li>
+<li>Dla tej osoby pobierz <code>accessLevel</code> z <code>/api/accesslevel</code>.</li>
+<li>Zidentyfikuj <strong>kod elektrowni</strong> (format: <code>PWR0000PL</code>) i przygotuj raport.</li>
+</ol>
+<h4 id="jak-wysłać-odpowiedź">Jak wysłać odpowiedź?</h4>
+<p>Wysyłasz ją metodą <strong>POST</strong> na <code>https://hub.ag3nts.org/verify</code>.</p>
+<p>Nazwa zadania to: <strong>findhim</strong>.</p>
+<p>Pole <code>answer</code> to <strong>pojedynczy obiekt</strong> zawierający:</p>
+<ul>
+<li><code>name</code> – imię podejrzanego</li>
+<li><code>surname</code> – nazwisko podejrzanego</li>
+<li><code>accessLevel</code> – poziom dostępu z <code>/api/accesslevel</code></li>
+<li><code>powerPlant</code> – kod elektrowni z <code>findhim_locations.json</code> (np. <code>PWR1234PL</code>)</li>
+</ul>
+<p>Przykład JSON do wysłania na <code>/verify</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;apikey&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tutaj-twój-klucz&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;task&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;findhim&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;answer&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Jan&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;surname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Kowalski&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;accessLevel&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;powerPlant&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PWR1234PL&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+<h4 id="nagroda">Nagroda</h4>
+<p>Jeśli Twoja odpowiedź będzie poprawna, Hub odeśle Ci flagę w formacie {FLG:JAKIES_SLOWO} - flagę należy wpisać pod adresem: <a href="https://hub.ag3nts.org/">https://hub.ag3nts.org/</a> (wejdź na tą stronę w swojej przeglądarce, zaloguj się kontem którym robiłeś zakup kursu i wpisz flagę w odpowiednie pole na stronie).</p>
+<h3 id="wskazówki">Wskazówki</h3>
+<ul>
+<li><strong>Dane wejściowe z poprzedniego zadania</strong> — lista podejrzanych pochodzi z zadania S01E01. Potrzebujesz imienia, nazwiska i roku urodzenia każdej osoby — warto zachować wynik S01E01 w formie nadającej się do ponownego użycia. Pamiętaj że chodzi tylko o osoby które wysyłałeś jako podejrzanych do Hubu.</li>
+<li><strong>Obliczanie odległości geograficznej</strong> — API zwraca współrzędne (latitude/longitude). Żeby sprawdzić, czy dana lokalizacja jest &quot;bardzo blisko&quot; elektrowni, użyj wzoru na odległość na kuli ziemskiej (np. <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine</a>). LLM pomoże Ci w napisaniu takiej funkcji. Szukamy osoby która była najbliżej którejś elektrowni.</li>
+<li><strong>Wykorzystaj Function Calling</strong> — to technika, w której model LLM zamiast odpowiadać tekstem wywołuje zdefiniowane przez Ciebie funkcje (narzędzia). Opisujesz narzędzia w formacie JSON Schema (nazwa, opis, parametry), a model sam decyduje, które wywołać i z jakimi argumentami. Ty obsługujesz wywołania i zwracasz wyniki z powrotem do modelu. W tym zadaniu Function Calling sprawdza się szczególnie dobrze: agent może samodzielnie iterować przez listę podejrzanych, odpytywać kolejne endpointy i wysłać gotową odpowiedź — bez sztywnego kodowania kolejności kroków w kodzie.</li>
+<li><strong>Format <code>birthYear</code></strong> — endpoint <code>/api/accesslevel</code> oczekuje roku urodzenia jako liczby całkowitej (np. <code>1987</code>). Jeśli Twoje dane zawierają pełną datę (np. <code>&quot;1987-08-07&quot;</code>), pamiętaj o wyciągnięciu samego roku przed wysłaniem żądania.</li>
+<li><strong>Zabezpieczenie pętli agenta</strong> — jeśli stosujesz podejście agentowe z Function Calling, ustal maksymalną liczbę iteracji (np. 10-15), żeby uchronić się przed nieskończoną pętlą w razie błędu modelu.</li>
+<li><strong>Wybór modelu</strong> - jeśli Twój agent myli się lub pracuje w kółko nie podając prawidłowej odpowiedzi, spróbuj użyć mocniejszego modelu lub lepiej sformułować prompt systemowy. W tym zadaniu dobrze sprawdza się na przykład model <code>gpt-5-mini</code> lub jego mocniejsza wersja <code>gpt-5</code>.</li>
+</ul>
+
+</body>
+</html>

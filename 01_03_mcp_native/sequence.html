@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_native — Sequence Diagram</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      sequence: {
+        actorMargin: 60,
+        messageMargin: 35,
+        mirrorActors: false,
+        useMaxWidth: true,
+      },
+      themeVariables: {
+        darkMode: true,
+        background: '#0d1117',
+        mainBkg: '#161b22',
+        fontFamily: 'Cascadia Code, Fira Code, monospace',
+        fontSize: '13px',
+        actorBkg: '#161b22',
+        actorBorder: '#30363d',
+        actorTextColor: '#e2e8f0',
+        actorLineColor: '#30363d',
+        signalColor: '#8b949e',
+        signalTextColor: '#c9d1d9',
+        labelBoxBkgColor: '#0d1117',
+        labelBoxBorderColor: '#30363d',
+        labelTextColor: '#8b949e',
+        loopTextColor: '#8b949e',
+        noteBkgColor: '#1c2128',
+        noteBorderColor: '#30363d',
+        noteTextColor: '#8b949e',
+        activationBkgColor: '#1c2128',
+        activationBorderColor: '#3d444d',
+      }
+    });
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 36px 32px 64px;
+    }
+
+    header {
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      font-size: 13px;
+      font-weight: 400;
+      color: #4a5568;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.03em;
+      margin-bottom: 5px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #2d3748;
+    }
+
+    .diagram-wrap {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 36px 24px;
+      overflow-x: auto;
+    }
+
+    .legend {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 28px;
+      font-size: 12px;
+      color: #4a5568;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-line {
+      width: 28px;
+      height: 2px;
+      flex-shrink: 0;
+    }
+
+    .legend-line.solid   { background: #8b949e; }
+    .legend-line.dashed  { background: repeating-linear-gradient(90deg, #4a5568 0 5px, transparent 5px 8px); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>01_03_mcp_native / message flow</h1>
+  <p>user query → agent loop → MCP &amp; native tool calls → final response</p>
+</header>
+
+<div class="diagram-wrap">
+  <pre class="mermaid">
+sequenceDiagram
+    autonumber
+
+    participant App  as app.js
+    participant Ag   as agent.js
+    participant AI   as ai.js
+    participant API  as Responses API
+    participant MC   as mcp/client.js
+    participant MS   as mcp/server.js
+    participant NT   as native/tools.js
+    participant Log  as log.js
+
+    Note over App,Log: Startup — createMcpServer, createMcpClient, createAgent (runs once)
+
+    App->>Ag: processQuery(query)
+    Ag->>Log: logQuery(query)
+
+    loop agent round — repeats until no tool calls, max 10
+
+        Ag->>AI: chat({ model, tools, conversation })
+        AI->>API: POST /responses
+        API-->>AI: { output: [ tool_calls | message ] }
+        AI-->>Ag: raw response object
+        Ag->>Ag: extractToolCalls(response)
+
+        alt tool calls present
+
+            loop for each tool call in parallel
+
+                Ag->>Log: logToolCall(label, name, args)
+
+                alt MCP tool  (get_weather · get_time)
+                    Ag->>MC: callMcpTool(client, name, args)
+                    MC->>MS: client.callTool({ name, arguments })
+                    MS->>MS: registered tool handler runs
+                    MS-->>MC: { content: [{ type: text, text: JSON }] }
+                    MC->>MC: JSON.parse(textContent.text)
+                    MC-->>Ag: parsed result object
+                else native tool  (calculate · uppercase)
+                    Ag->>NT: nativeHandlers[name](args)
+                    NT-->>Ag: { result: value }
+                end
+
+                Ag->>Log: logToolResult(result)
+
+            end
+
+            Note over Ag: tool results appended to conversation → next round
+
+        else no tool calls
+            Ag->>Ag: extractText(response)
+            Ag->>Log: logResponse(text)
+            Ag-->>App: final answer string
+        end
+
+    end
+  </pre>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-line solid"></div>
+    call / request
+  </div>
+  <div class="legend-item">
+    <div class="legend-line dashed"></div>
+    return value
+  </div>
+</div>
+
+</body>
+</html>

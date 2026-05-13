@@ -1,0 +1,11 @@
+{
+  "name": "01_02_task",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "findhim - identify suspect near nuclear power plant using agent + function calling",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "license": "ISC"
+}

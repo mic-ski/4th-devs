@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_native — Code Cards</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 40px 32px 64px;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #4a5568;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #2d3748;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Card header ── */
+    .card-head {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .type-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      flex-shrink: 0;
+    }
+
+    .filename {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .filepath {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+      margin-top: 2px;
+    }
+
+    /* ── Purpose ── */
+    .card-purpose {
+      padding: 14px 20px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #8b949e;
+      border-bottom: 1px solid #21262d;
+      flex: 1;
+    }
+
+    /* ── Sections ── */
+    .card-section {
+      padding: 13px 20px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-section:last-child {
+      border-bottom: none;
+    }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3d444d;
+      margin-bottom: 9px;
+    }
+
+    /* ── Chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .chip {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .chip-export {
+      background: #0d2818;
+      color: #7ee8a2;
+      border: 1px solid #1a4731;
+    }
+
+    .chip-import {
+      background: #0d1b2e;
+      color: #79b8ff;
+      border: 1px solid #1a3352;
+    }
+
+    .none-text {
+      font-size: 12px;
+      color: #2d3748;
+      font-style: italic;
+    }
+
+    /* ── Import groups ── */
+    .import-group {
+      margin-bottom: 10px;
+    }
+
+    .import-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .import-source {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+      margin-bottom: 5px;
+    }
+
+    .import-source span {
+      color: #4a5568;
+    }
+
+    /* ── Type colour tokens ── */
+    .type-entry  { --accent: #f97316; }
+    .type-local  { --accent: #3b82f6; }
+    .type-config { --accent: #a855f7; }
+    .type-npm    { --accent: #6b7280; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>01_03_mcp_native / code cards</h1>
+  <p>7 source files · imports, exports, and purpose at a glance</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const files = [
+  {
+    filename: 'app.js',
+    path: 'app.js',
+    type: 'entry',
+    typeLabel: 'entry point',
+    purpose: 'Wires up the MCP server and client, merges MCP and native tool handlers behind a unified interface, then runs five example queries through the agent loop. The model never sees the difference between MCP and native tools.',
+    exports: [],
+    imports: [
+      { from: 'src/mcp/server.js',   names: ['createMcpServer'] },
+      { from: 'src/mcp/client.js',   names: ['createMcpClient', 'listMcpTools', 'mcpToolsToOpenAI', 'callMcpTool'] },
+      { from: 'src/native/tools.js', names: ['nativeTools', 'nativeHandlers'] },
+      { from: 'src/agent.js',        names: ['createAgent'] },
+      { from: 'src/log.js',          names: ['MCP_LABEL', 'NATIVE_LABEL'] },
+      { from: '../config.js',        names: ['resolveModelForProvider'] },
+    ],
+  },
+  {
+    filename: 'agent.js',
+    path: 'src/agent.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Runs the agent loop. Sends queries to the AI, extracts tool calls from the response, dispatches each through the handler map, then feeds results back into the conversation — looping until the model stops calling tools or the round limit is hit.',
+    exports: ['createAgent'],
+    imports: [
+      { from: 'src/ai.js',  names: ['chat', 'extractToolCalls', 'extractText'] },
+      { from: 'src/log.js', names: ['logQuery', 'logToolCall', 'logToolResult', 'logToolError', 'logToolCount', 'logResponse'] },
+    ],
+  },
+  {
+    filename: 'ai.js',
+    path: 'src/ai.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'AI provider client. Sends a chat request to the Responses API and returns the raw response object. Two small helpers let callers pull out tool calls or plain text without touching the response shape directly.',
+    exports: ['chat', 'extractToolCalls', 'extractText'],
+    imports: [
+      { from: '../config.js', names: ['AI_API_KEY', 'EXTRA_API_HEADERS', 'RESPONSES_API_ENDPOINT'] },
+    ],
+  },
+  {
+    filename: 'log.js',
+    path: 'src/log.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Logging helpers with ANSI colour codes. Handles every stage of output — queries, tool calls, results, errors, and final responses — so the agent loop stays free of console.log calls.',
+    exports: ['MCP_LABEL', 'NATIVE_LABEL', 'logQuery', 'logToolCall', 'logToolResult', 'logToolError', 'logToolCount', 'logResponse'],
+    imports: [],
+  },
+  {
+    filename: 'client.js',
+    path: 'src/mcp/client.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'MCP client. Connects to the in-memory server via InMemoryTransport and exposes helpers that bridge MCP\'s tool schema format to the OpenAI function-calling format the agent loop expects.',
+    exports: ['createMcpClient', 'listMcpTools', 'callMcpTool', 'mcpToolsToOpenAI'],
+    imports: [
+      { from: '@modelcontextprotocol/sdk', names: ['Client', 'InMemoryTransport'] },
+    ],
+  },
+  {
+    filename: 'server.js',
+    path: 'src/mcp/server.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'In-memory MCP server. Registers two mock tools — get_weather and get_time — and runs in the same process. Uses InMemoryTransport instead of stdio, so no subprocess is needed.',
+    exports: ['createMcpServer'],
+    imports: [
+      { from: '@modelcontextprotocol/sdk', names: ['McpServer'] },
+      { from: 'zod',                       names: ['z'] },
+    ],
+  },
+  {
+    filename: 'tools.js',
+    path: 'src/native/tools.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Native tool definitions. Two plain JS tools — calculate and uppercase — written directly in OpenAI function format. No protocol or transport involved. The agent treats them identically to MCP tools via the shared handler map.',
+    exports: ['nativeTools', 'nativeHandlers'],
+    imports: [],
+  },
+];
+
+function chipHTML(name, cls) {
+  return `<span class="chip ${cls}">${name}</span>`;
+}
+
+function renderCard(f) {
+  const exportsHTML = f.exports.length
+    ? `<div class="chips">${f.exports.map(e => chipHTML(e, 'chip-export')).join('')}</div>`
+    : `<span class="none-text">none — entry point</span>`;
+
+  const importsHTML = f.imports.length
+    ? f.imports.map(imp => `
+        <div class="import-group">
+          <div class="import-source"><span>from</span> ${imp.from}</div>
+          <div class="chips">${imp.names.map(n => chipHTML(n, 'chip-import')).join('')}</div>
+        </div>`).join('')
+    : `<span class="none-text">no local imports</span>`;
+
+  return `
+    <div class="card type-${f.type}">
+      <div class="card-head">
+        <div class="card-meta">
+          <span class="type-badge">${f.typeLabel}</span>
+          <span class="filename">${f.filename}</span>
+        </div>
+        <div class="filepath">${f.path}</div>
+      </div>
+      <div class="card-purpose">${f.purpose}</div>
+      <div class="card-section">
+        <div class="section-label">Exports</div>
+        ${exportsHTML}
+      </div>
+      <div class="card-section">
+        <div class="section-label">Imports from</div>
+        ${importsHTML}
+      </div>
+    </div>`;
+}
+
+document.getElementById('grid').innerHTML = files.map(renderCard).join('');
+</script>
+</body>
+</html>

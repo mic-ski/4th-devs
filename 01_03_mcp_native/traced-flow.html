@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_native — Traced Flow</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 40px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 36px;
+    }
+
+    header h1 {
+      font-size: 13px;
+      font-weight: 400;
+      color: #3d444d;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    .query-display {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 16px;
+      color: #f0f6fc;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-left: 3px solid #f97316;
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    /* ── Flow column ── */
+    .flow {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .step-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      border: 1.5px solid color-mix(in srgb, var(--accent) 40%, transparent);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .card-head-text {
+      flex: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px;
+      flex-wrap: wrap;
+    }
+
+    .filename {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .type-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+
+    .filepath {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+    }
+
+    .card-title {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #c9d1d9;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-body {
+      padding: 13px 20px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #6e7681;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-code {
+      padding: 13px 20px;
+    }
+
+    .code-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #3d444d;
+      margin-bottom: 8px;
+    }
+
+    pre.code-block {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      padding: 11px 14px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: #8b949e;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    pre.code-block .hl   { color: #e2e8f0; }
+    pre.code-block .str  { color: #a5d6ff; }
+    pre.code-block .key  { color: #7ee787; }
+    pre.code-block .mcp  { color: #38bdf8; }
+    pre.code-block .dim  { color: #3d444d; }
+
+    /* ── Connector ── */
+    .connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 0;
+      gap: 0;
+    }
+
+    .connector-line {
+      width: 2px;
+      height: 18px;
+      background: #21262d;
+    }
+
+    .connector-pill {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #4a5568;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 20px;
+      padding: 4px 14px;
+      white-space: nowrap;
+      max-width: 660px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .connector-arrow {
+      color: #21262d;
+      font-size: 16px;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    /* ── Type tokens ── */
+    .t-entry    { --accent: #f97316; }
+    .t-local    { --accent: #3b82f6; }
+    .t-mcp      { --accent: #38bdf8; }
+    .t-external { --accent: #6b7280; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>01_03_mcp_native / traced flow — single query</h1>
+  <div class="query-display">"What's the weather in Tokyo?"</div>
+</header>
+
+<div class="flow" id="flow"></div>
+
+<script>
+const stages = [
+  {
+    step: 1,
+    file: 'app.js',
+    path: 'app.js',
+    type: 'entry',
+    typeLabel: 'entry point',
+    title: 'Query submitted to the agent',
+    body: 'The handlers map is already built: MCP tool handlers wrap callMcpTool(), native handlers wrap plain functions. Both share the same { execute, label } interface, so the agent treats them identically.',
+    codeLabel: 'input',
+    code: [
+      { t: 'str', v: '"What\'s the weather in Tokyo?"' },
+    ],
+  },
+  {
+    step: 2,
+    file: 'agent.js',
+    path: 'src/agent.js',
+    type: 'local',
+    typeLabel: 'local module',
+    title: 'Round 1 — conversation built, AI called',
+    body: 'logQuery() prints the query header to the console. The conversation starts as a single user message. All 4 tool definitions are included — the model sees MCP and native tools identically.',
+    codeLabel: 'chat() called with',
+    code: [
+      { t: 'key', v: 'model' },    { t: 'dim', v: ':  ' }, { t: 'str', v: '"gpt-5.2"' },
+      { t: 'br' },
+      { t: 'key', v: 'tools' },    { t: 'dim', v: ':  ' }, { t: 'hl',  v: '[get_weather, get_time, calculate, uppercase]' },
+      { t: 'br' },
+      { t: 'key', v: 'input' },    { t: 'dim', v: ':  ' }, { t: 'hl',  v: '[{ role: "user", content: "What\'s the weather in Tokyo?" }]' },
+    ],
+  },
+  {
+    step: 3,
+    file: 'ai.js  +  Responses API',
+    path: 'src/ai.js  →  POST /responses',
+    type: 'external',
+    typeLabel: 'ext. HTTP',
+    title: 'AI responds — calls get_weather',
+    body: 'fetch() sends the model, tools, and conversation. The Responses API returns an output array. The model picks get_weather as the right tool and provides the city argument. extractToolCalls() filters output to items where type === "function_call".',
+    codeLabel: 'tool call in response.output',
+    code: [
+      { t: 'key', v: 'type' },      { t: 'dim', v: ':  ' }, { t: 'str',  v: '"function_call"' },
+      { t: 'br' },
+      { t: 'key', v: 'name' },      { t: 'dim', v: ':  ' }, { t: 'str',  v: '"get_weather"' },
+      { t: 'br' },
+      { t: 'key', v: 'arguments' }, { t: 'dim', v: ':  ' }, { t: 'str',  v: '"{\\"city\\":\\"Tokyo\\"}"' },
+    ],
+  },
+  {
+    step: 4,
+    file: 'agent.js',
+    path: 'src/agent.js  →  executeToolCall()',
+    type: 'local',
+    typeLabel: 'local module',
+    title: 'Tool dispatched — MCP path taken',
+    body: 'JSON.parse() turns the arguments string into an object. The handler map lookup for "get_weather" returns { execute, label: MCP_LABEL }. logToolCall() prints the cyan 🔌 MCP label.',
+    codeLabel: 'dispatch',
+    code: [
+      { t: 'key', v: 'handler.label' },   { t: 'dim', v: '  →  ' }, { t: 'mcp', v: 'MCP_LABEL  (🔌 MCP)' },
+      { t: 'br' },
+      { t: 'key', v: 'handler.execute' }, { t: 'dim', v: '  →  ' }, { t: 'hl',  v: 'callMcpTool(client, "get_weather", { city: "Tokyo" })' },
+    ],
+  },
+  {
+    step: 5,
+    file: 'mcp/client.js  →  mcp/server.js',
+    path: 'src/mcp/client.js  →  src/mcp/server.js',
+    type: 'mcp',
+    typeLabel: 'MCP protocol',
+    title: 'MCP tool executes over InMemoryTransport',
+    body: 'client.callTool() sends the call over the in-memory transport — no subprocess, no stdio. The server\'s registered get_weather handler runs, picks a random condition and temperature, and wraps the result in MCP\'s content array. The client parses the text field back to a plain object.',
+    codeLabel: 'server returns → client parses',
+    code: [
+      { t: 'dim', v: '// server handler returns' },
+      { t: 'br' },
+      { t: 'hl',  v: '{ content: [{ type: "text", text: \'{"city":"Tokyo",' },
+      { t: 'br' },
+      { t: 'hl',  v: '    "condition":"sunny","temperature":"22°C"}\' }] }' },
+      { t: 'br' },
+      { t: 'br' },
+      { t: 'dim', v: '// client parses text → returns' },
+      { t: 'br' },
+      { t: 'mcp', v: '{ city: "Tokyo", condition: "sunny", temperature: "22°C" }' },
+    ],
+  },
+  {
+    step: 6,
+    file: 'agent.js',
+    path: 'src/agent.js',
+    type: 'local',
+    typeLabel: 'local module',
+    title: 'Round 2 — result appended, AI called again',
+    body: 'logToolResult() prints the parsed weather object. The result is wrapped in a function_call_output item and appended to the conversation. A second chat() call sends the full history to the model.',
+    codeLabel: 'conversation sent to Round 2',
+    code: [
+      { t: 'dim', v: '[0]  ' }, { t: 'hl',  v: '{ role: "user",               content: "What\'s the weather..." }' },
+      { t: 'br' },
+      { t: 'dim', v: '[1]  ' }, { t: 'hl',  v: '{ type: "function_call",       name: "get_weather" }' },
+      { t: 'br' },
+      { t: 'dim', v: '[2]  ' }, { t: 'mcp',  v: '{ type: "function_call_output", output: "{\\"city\\":\\"Tokyo\\",...}" }' },
+    ],
+  },
+  {
+    step: 7,
+    file: 'ai.js  +  Responses API',
+    path: 'src/ai.js  →  POST /responses',
+    type: 'external',
+    typeLabel: 'ext. HTTP',
+    title: 'AI composes final answer — no tool calls',
+    body: 'The model now has the weather data in context and returns a plain text message. extractToolCalls() finds an empty array. The loop exits without another round.',
+    codeLabel: 'response — text only, no function_call',
+    code: [
+      { t: 'key', v: 'output_text' }, { t: 'dim', v: ':  ' },
+      { t: 'str', v: '"The weather in Tokyo is currently sunny' },
+      { t: 'br' },
+      { t: 'str', v: '              with a temperature of 22°C."' },
+    ],
+  },
+  {
+    step: 8,
+    file: 'agent.js  +  log.js',
+    path: 'src/agent.js  →  src/log.js',
+    type: 'local',
+    typeLabel: 'local module',
+    title: 'Answer extracted and returned',
+    body: 'extractText() pulls the string from the response. logResponse() prints it with a green "Assistant:" prefix. The final answer string is returned to app.js, which moves on to the next query.',
+    codeLabel: 'final answer returned to app.js',
+    code: [
+      { t: 'str', v: '"The weather in Tokyo is currently sunny with a temperature of 22°C."' },
+    ],
+  },
+];
+
+const connectors = [
+  'processQuery("What\'s the weather in Tokyo?")',
+  'chat({ model, tools, input })',
+  'response → extractToolCalls() → 1 tool call found',
+  'callMcpTool(client, "get_weather", { city: "Tokyo" })',
+  '{ city: "Tokyo", condition: "sunny", temperature: "22°C" }',
+  'chat({ model, tools, conversation + tool result })',
+  'response → extractText()',
+];
+
+function renderTokens(tokens) {
+  return tokens.map(tok => {
+    if (tok.t === 'br') return '\n';
+    const cls = {
+      hl: 'hl', str: 'str', key: 'key', mcp: 'mcp', dim: 'dim'
+    }[tok.t] || '';
+    return `<span class="${cls}">${tok.v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+  }).join('');
+}
+
+function renderCard(s) {
+  const typeClass = { entry: 't-entry', local: 't-local', mcp: 't-mcp', external: 't-external' }[s.type];
+  return `
+    <div class="card ${typeClass}">
+      <div class="card-head">
+        <div class="step-badge">${String(s.step).padStart(2, '0')}</div>
+        <div class="card-head-text">
+          <div class="card-meta">
+            <span class="filename">${s.file}</span>
+            <span class="type-badge">${s.typeLabel}</span>
+          </div>
+          <div class="filepath">${s.path}</div>
+        </div>
+      </div>
+      <div class="card-title">${s.title}</div>
+      <div class="card-body">${s.body}</div>
+      <div class="card-code">
+        <div class="code-label">${s.codeLabel}</div>
+        <pre class="code-block">${renderTokens(s.code)}</pre>
+      </div>
+    </div>`;
+}
+
+function renderConnector(label) {
+  return `
+    <div class="connector">
+      <div class="connector-line"></div>
+      <div class="connector-pill">${label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div class="connector-line" style="height:10px"></div>
+      <div class="connector-arrow">▼</div>
+    </div>`;
+}
+
+const flow = document.getElementById('flow');
+stages.forEach((s, i) => {
+  flow.insertAdjacentHTML('beforeend', renderCard(s));
+  if (i < connectors.length) {
+    flow.insertAdjacentHTML('beforeend', renderConnector(connectors[i]));
+  }
+});
+</script>
+</body>
+</html>

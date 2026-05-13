@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>s01e03-qa1.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+<link rel="stylesheet" href="file://c:\VSCODE\4th-devs_weeks\week1-3\dark-theme.css" type="text/css">
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="s01e03--qa-and-lessons-learned">S01E03 — Q&amp;A and Lessons Learned</h1>
+<hr>
+<h2 id="1-const-arrow-functions-vs-function-declarations--execution-order">1. <code>const</code> arrow functions vs <code>function</code> declarations — execution order</h2>
+<p>Both work identically at runtime. The difference is hoisting:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// function declaration — hoisted, can be called before it&#x27;s defined</span>
+<span class="hljs-title function_">greet</span>();
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params"></span>) { <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;hello&quot;</span>); }  <span class="hljs-comment">// works fine</span>
+
+<span class="hljs-comment">// const arrow — NOT hoisted, must be defined before it&#x27;s called</span>
+<span class="hljs-title function_">greet</span>();  <span class="hljs-comment">// ReferenceError: Cannot access &#x27;greet&#x27; before initialization</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">greet</span> = (<span class="hljs-params"></span>) =&gt; { <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;hello&quot;</span>); };
+</div></code></pre>
+<p><strong>The aha moment:</strong> using <code>const</code> arrows enforces the same top-to-bottom execution order that Python and most other languages have by default. Hoisting is a JS-specific quirk. Writing everything as <code>const</code> arrows makes the code behave more predictably — define before use, always.</p>
+<hr>
+<h2 id="2-even-local-connections-need-await">2. Even local connections need <code>await</code></h2>
+<p>&quot;Local&quot; doesn't mean synchronous. The MCP client connects to the server over stdio — even on the same machine, that involves I/O: spawning a process, opening a channel, doing a handshake. Node.js handles all I/O asynchronously regardless of whether it crosses a network.</p>
+<p>The distinction is not <strong>local vs remote</strong> — it's <strong>CPU work</strong> (synchronous) vs <strong>I/O or inter-process communication</strong> (always async, always needs <code>await</code>).</p>
+<hr>
+<h2 id="3-without-await-you-get-a-promise-not-the-value">3. Without <code>await</code> you get a Promise, not the value</h2>
+<p>When you call an <code>async</code> function, it immediately returns a <strong>Promise</strong> — it doesn't wait for the work inside to finish. <code>await</code> pauses execution on that line until the Promise resolves, then gives you the actual value.</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> mcpClient = <span class="hljs-title function_">createMcpClient</span>(mcpServer);
+<span class="hljs-comment">// mcpClient is a Promise — not a connected client</span>
+mcpClient.<span class="hljs-title function_">doSomething</span>();  <span class="hljs-comment">// TypeError: not a function</span>
+
+<span class="hljs-keyword">const</span> mcpClient = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createMcpClient</span>(mcpServer);
+<span class="hljs-comment">// execution pauses here until the connection is ready</span>
+mcpClient.<span class="hljs-title function_">doSomething</span>();  <span class="hljs-comment">// works fine</span>
+</div></code></pre>
+<p><strong>Mental model:</strong> a Promise is like a ticket at a restaurant counter — it represents your order, but it's not the food. <code>await</code> is you standing at the counter until they call your number and hand you the actual thing. Without <code>await</code> you're walking away with just the ticket and then trying to eat it.</p>
+<p>The work still happens in the background either way — the difference is whether your next line of code gets the result or the ticket.</p>
+<hr>
+<h2 id="4-objectentries-and-objectfromentries-are-exact-opposites">4. <code>Object.entries()</code> and <code>Object.fromEntries()</code> are exact opposites</h2>
+<p><code>.map()</code> only works on arrays — not objects. So the standard pattern for transforming object values is:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> };
+
+<span class="hljs-keyword">const</span> doubled = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(obj).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">[key, val]</span>) =&gt;</span> [key, val * <span class="hljs-number">2</span>])
+);
+<span class="hljs-comment">// { a: 2, b: 4, c: 6 }</span>
+</div></code></pre>
+<ul>
+<li><code>Object.entries()</code> — object → array of <code>[key, value]</code> pairs</li>
+<li><code>.map()</code> — transform each pair</li>
+<li><code>Object.fromEntries()</code> — array of pairs → object</li>
+</ul>
+<p><strong>The aha moment:</strong> <code>.map()</code> is arrays-only. This three-step pattern is the workaround when you want to transform an object.</p>
+<hr>
+<h2 id="5-curly-braces-mean-opposite-things-depending-on-which-side-of--theyre-on">5. Curly braces mean opposite things depending on which side of <code>=</code> they're on</h2>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> { tools } = response;        <span class="hljs-comment">// LEFT side — destructuring, unpacking a property OUT of an object</span>
+<span class="hljs-keyword">const</span> response = { <span class="hljs-attr">tools</span>: [...] };  <span class="hljs-comment">// RIGHT side — creating a new object</span>
+</div></code></pre>
+<p>Same syntax, opposite operations. The side of the <code>=</code> is the only clue.</p>
+<hr>
+<h2 id="6-two-separate-things-schema-for-the-llm-vs-handlers-for-your-code">6. Two separate things: schema for the LLM vs handlers for your code</h2>
+<p>The LLM and your runtime need completely different things from a tool:</p>
+<ul>
+<li><strong><code>tools</code></strong> (schema) — sent to the LLM so it knows what tools exist and what arguments they take. Just descriptions, no code.</li>
+<li><strong><code>handlers</code></strong> — the actual functions that run when the LLM decides to call a tool. Never seen by the LLM.</li>
+</ul>
+<p>The LLM never sees or runs any code. The flow is:</p>
+<ol>
+<li>You send the schema to the LLM — tool names, descriptions, argument types</li>
+<li>The LLM decides which tool to call and with what arguments, and returns that decision as JSON</li>
+<li>Your code reads that decision, looks up the tool in <code>handlers</code>, and executes it</li>
+<li>You send the result back to the LLM so it can form a response</li>
+</ol>
+<p><strong>Mental model:</strong> the LLM is filling out an order form. It says &quot;I want get_weather with city=Tokyo.&quot; Your code is the kitchen — it reads the form and actually does the work. The kitchen never appears on the menu.</p>
+<hr>
+<h2 id="7-the-ops-lookup-table-pattern--an-alternative-to-ifelse-chains">7. The <code>ops</code> lookup table pattern — an alternative to <code>if/else</code> chains</h2>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> ops = {
+  <span class="hljs-attr">add</span>:      <span class="hljs-function">() =&gt;</span> a + b,
+  <span class="hljs-attr">subtract</span>: <span class="hljs-function">() =&gt;</span> a - b,
+  <span class="hljs-attr">multiply</span>: <span class="hljs-function">() =&gt;</span> a * b,
+  <span class="hljs-attr">divide</span>:   <span class="hljs-function">() =&gt;</span> b === <span class="hljs-number">0</span> ? { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;Division by zero&quot;</span> } : a / b
+};
+
+<span class="hljs-keyword">const</span> result = ops[operation]?.();
+</div></code></pre>
+<p>Instead of four <code>if/else</code> branches, build an object where keys are operation names and values are functions. Look up by key, call with <code>()</code>.</p>
+<p><strong>Why it scales better:</strong> adding a fifth operation is one new line. With <code>if/else</code> it's another branch. The <code>?.</code> before <code>()</code> handles the case where <code>operation</code> doesn't match any key — returns <code>undefined</code> instead of crashing.</p>
+<p><strong>The <code>()</code> at the end is what actually executes the function:</strong></p>
+<pre class="hljs"><code><div>ops[operation]     <span class="hljs-comment">// retrieves the function — not called yet, nothing runs</span>
+ops[operation]?.() <span class="hljs-comment">// retrieves the function AND calls it immediately</span>
+</div></code></pre>
+<p>Without <code>()</code> you'd just hold a reference to the function, like picking up a tool but never using it.</p>
+<p><strong>Dot vs bracket notation — a key distinction:</strong></p>
+<pre class="hljs"><code><div>ops.<span class="hljs-property">operation</span>    <span class="hljs-comment">// looks for a key literally named &quot;operation&quot; — wrong</span>
+ops[operation]   <span class="hljs-comment">// looks for a key named whatever the VALUE of the variable is — correct</span>
+</div></code></pre>
+<p>Dot notation is for when you know the key name at write time. Bracket notation is for when the key is dynamic — stored in a variable. Same concept as Python's <code>dict[key]</code>.</p>
+<hr>
+<h2 id="8-shorthand-method-syntax-in-objects">8. Shorthand method syntax in objects</h2>
+<p>JS lets you define functions inside objects without writing <code>: function</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// shorthand</span>
+<span class="hljs-keyword">const</span> handlers = {
+  <span class="hljs-title function_">calculate</span>(<span class="hljs-params">{ operation, a, b }</span>) { ... }
+}
+
+<span class="hljs-comment">// same thing written in full</span>
+<span class="hljs-keyword">const</span> handlers = {
+  <span class="hljs-attr">calculate</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">{ operation, a, b }</span>) { ... }
+}
+</div></code></pre>
+<p>The key is <code>calculate</code>, the value is a function. The shorthand just drops <code>: function</code>.</p>
+<p><strong>No Python equivalent.</strong> In Python you'd define the function separately and reference it:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate</span>(<span class="hljs-params">args</span>): ...
+
+handlers = {
+    <span class="hljs-string">&quot;calculate&quot;</span>: calculate   <span class="hljs-comment"># reference to an already-defined function</span>
+}
+</div></code></pre>
+<p>In JS, defining functions inline directly inside objects is idiomatic and very common. Arrow functions have no complexity limit for inline use, unlike Python lambdas which are restricted to a single expression.</p>
+<hr>
+<h2 id="9-destructuring-at-the-parameter-level">9. Destructuring at the parameter level</h2>
+<p>You can unpack an object argument right in the function signature:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// receive whole object, extract later</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">calculate</span>(<span class="hljs-params">args</span>) {
+  <span class="hljs-keyword">const</span> operation = args.<span class="hljs-property">operation</span>;
+  <span class="hljs-keyword">const</span> a = args.<span class="hljs-property">a</span>;
+}
+
+<span class="hljs-comment">// extract immediately at the parameter level</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">calculate</span>(<span class="hljs-params">{ operation, a, b }</span>) {
+  <span class="hljs-comment">// operation, a, b are ready to use</span>
+}
+</div></code></pre>
+<p>The object still arrives as one argument — destructuring just unpacks it on the way in. Saves three lines and makes the expected shape explicit in the signature.</p>
+<hr>
+<h2 id="10-arrow-functions--with-and-without-curly-braces">10. Arrow functions — with and without curly braces</h2>
+<pre class="hljs"><code><div><span class="hljs-comment">// with curly braces — must use explicit return</span>
+(tool) =&gt; {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">name</span>: tool.<span class="hljs-property">name</span> };
+}
+
+<span class="hljs-comment">// without curly braces — value is returned implicitly</span>
+(tool) =&gt; ({ <span class="hljs-attr">name</span>: tool.<span class="hljs-property">name</span> })
+</div></code></pre>
+<p>The extra <code>()</code> around the object literal is required — without them, JS reads <code>{</code> as the start of a function body, not an object. Wrapping in <code>()</code> tells the parser &quot;this is an object, not a block.&quot;</p>
+<hr>
+<h2 id="11-toolslength--one-expression-three-cases-handled">11. <code>tools?.length</code> — one expression, three cases handled</h2>
+<pre class="hljs"><code><div><span class="hljs-keyword">if</span> (tools?.<span class="hljs-property">length</span>) { ... }
+</div></code></pre>
+<p>Handles all three failure modes in one go:</p>
+<ul>
+<li><code>tools</code> is <code>undefined</code> → <code>?.</code> returns <code>undefined</code> → falsy → skip</li>
+<li><code>tools</code> is <code>null</code> → <code>?.</code> returns <code>undefined</code> → falsy → skip</li>
+<li><code>tools</code> is an empty array → <code>length</code> is <code>0</code> → falsy → skip</li>
+</ul>
+<p>Only runs when <code>tools</code> exists AND has at least one item. The long version would be:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">if</span> (tools !== <span class="hljs-literal">undefined</span> &amp;&amp; tools !== <span class="hljs-literal">null</span> &amp;&amp; tools.<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span>)
+</div></code></pre>
+<hr>
+<h2 id="12-zod--define-schema-and-get-validation-for-free">12. Zod — define schema and get validation for free</h2>
+<p>Zod is a general-purpose JS validation library (not LLM-specific). You describe the shape of data you expect, and Zod both validates incoming data at runtime and generates JSON Schema automatically:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// you write this</span>
+{ <span class="hljs-attr">city</span>: z.<span class="hljs-title function_">string</span>().<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;City name&quot;</span>) }
+
+<span class="hljs-comment">// Zod generates this</span>
+{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>,
+  <span class="hljs-attr">properties</span>: {
+    <span class="hljs-attr">city</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;string&quot;</span>, <span class="hljs-attr">description</span>: <span class="hljs-string">&quot;City name&quot;</span> }
+  },
+  <span class="hljs-attr">required</span>: [<span class="hljs-string">&quot;city&quot;</span>]
+}
+</div></code></pre>
+<p>Without Zod you'd write the JSON Schema by hand and add manual <code>typeof</code> checks yourself. Zod collapses both into one line.</p>
+<hr>
+<h2 id="13-images-in-json--why-base64">13. Images in JSON — why base64?</h2>
+<p>JSON is a text format. Raw image bytes contain values that have no valid text representation and can clash with JSON's own special characters. Base64 converts every byte into a character from a safe 64-character alphabet that JSON handles without ambiguity — at the cost of ~33% size increase.</p>
+<p>Alternatives:</p>
+<ul>
+<li><strong>Multipart form data</strong> — used by browsers when uploading files, sends raw bytes without encoding</li>
+<li><strong>URL reference</strong> — store the image somewhere, send just the URL in JSON (what most web UIs do)</li>
+<li><strong>Base64 in JSON</strong> — simpler when you don't have file storage infrastructure; what the Anthropic API uses for image inputs</li>
+</ul>
+<hr>
+<h2 id="14-inmemorytransport--fake-network-for-testing">14. <code>InMemoryTransport</code> — fake network for testing</h2>
+<p>The official MCP SDK ships with <code>InMemoryTransport.createLinkedPair()</code> — two linked transport objects that simulate a real client/server channel entirely in memory. No network, no stdio, no separate process.</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> [clientTransport, serverTransport] = <span class="hljs-title class_">InMemoryTransport</span>.<span class="hljs-title function_">createLinkedPair</span>();
+</div></code></pre>
+<p>One array returned, destructured into two variables. The client and server each get one end and connect through it as if it were real.</p>
+<p><strong>Mental model:</strong> think of it like a pair of walkie-talkies — they come as a linked pair, pre-wired to each other. Whatever one sends, the other receives. <code>clientTransport</code> is one walkie-talkie, <code>serverTransport</code> is the other. The client and server don't know or care that there's no real radio signal — they just talk through their respective ends.</p>
+<p>In production you'd swap <code>InMemoryTransport</code> for stdio transport (local process) or HTTP transport (remote server). The tool logic inside the server wouldn't change at all — only the transport layer differs. That's the point of the abstraction.</p>
+
+</body>
+</html>

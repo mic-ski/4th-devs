@@ -1,0 +1,1475 @@
+ ▐▛███▜▌   Claude Code v2.1.86
+▝▜█████▛▘  Sonnet 4.6 · Claude Pro
+  ▘▘ ▝▝    C:\VSCODE\4th-devs_weeks\week1-2
+
+❯ ok, based on the codebase in 01_02_tool_use help me create a similar logic    
+and structure (only where it makes sense) app in folder 01_02_task according to 
+ task described in Polish in file 01_02_task.txt. I already prepared the power  
+plant names in 01_02_task\input\findhim_locations.json and a json of suspected  
+people in 01_02_task\input\people.json. I would like to create an agent         
+architecture based on 01_02_tool_use where and agent can be called several      
+times to solve the exercise. I guess we need a custom tool which can be run     
+through Function Calling to calculate distance from the person to each of the   
+power plants. Input: Power Plant location (a city in Poland) and last           
+coordinates of the person. I think the logic would be such that the agent would 
+ pick every person one by one, call the API to get the coordinates (is this a   
+Function Call?), then Function Calling the tool to calculate the distance (the  
+tool itself is using the Haversine formula), when it finishes with one person,  
+the results would be saved to a .CSV table along with all the info of the       
+person and distances to each power plant. Then the context of the convo is      
+cleared and agent moves to another person in the list. When finishing the list, 
+ the last new tool will be called to calculate which person was the closest     
+which power plant, the results fed to both the file send.json (ready to be      
+sent) and to LLM so it can formulate the nice answer and ask whether to post    
+the answer to the course hub. If yes, another new tool will be called for       
+sending the answer. The answer from the server can be print to the terminal (if 
+ that makes sense). First let's just do a plan, explaining the logic, in/out.   
+Also please improve any logic in what I proposed.                               
+
+● Let me read the task file and explore the existing codebase first.
+
+  Read 1 file (ctrl+o to expand)
+
+● Explore(Explore 01_02_tool_use codebase structure)
+  ⎿  Done (15 tool uses · 25.5k tokens · 33s)
+  (ctrl+o to expand)
+
+  Read 2 files (ctrl+o to expand)
+
+● Let me also read the key source files directly to make sure I have precise
+  details.
+
+  Read 3 files (ctrl+o to expand)
+
+● Now I have everything I need. Let me write the full plan.
+
+  ---
+  Plan: findhim Agent App
+
+  Here is the full architecture plan with explanations of each decision.
+
+  ---
+  What the task asks (translated from Polish)
+
+  You have 5 suspects from a previous task. You need to find which one was 
+  spotted near a nuclear power plant in Poland. For that person, find their
+  access level, then submit name + surname + accessLevel + powerPlantCode to
+  /verify.
+
+  ---
+  Proposed file structure
+
+  01_02_task/
+  ├── app.js                        ← Entry point. Runs all 3 phases.
+  ├── package.json
+  ├── src/
+  │   ├── config.js                 ← API key, model, endpoint URLs
+  │   ├── api.js                    ← LLM chat() + external HTTP helpers
+  │   ├── executor.js               ← Agent loop (same pattern as
+  01_02_tool_use)
+  │   ├── geocoder.js               ← Geocodes city names → lat/lon (one-time at
+   startup)
+  │   ├── haversine.js              ← Pure Haversine formula (no AI needed)
+  │   ├── csv.js                    ← Append/read CSV helpers
+  │   └── tools/
+  │       ├── definitions.js        ← JSON schemas for each tool
+  │       ├── handlers.js           ← JavaScript that executes the tools
+  │       └── index.js              ← Exports both
+  ├── input/
+  │   ├── findhim_locations.json    ← Power plants (already exists)
+  │   └── people.json              ← Suspects (already exists)
+  └── output/
+      ├── distances.csv             ← Results table, written during Phase 1
+      └── send.json                 ← Final answer, written before submission
+
+  ---
+  The 3 Phases
+
+  Phase 1 — Data collection (one agent call per person)
+
+  The outer loop in app.js iterates through people.json. For each person, it
+  calls processQuery(...), the same function from 01_02_tool_use. When that
+  person is done, the conversation is thrown away (context cleared) before the
+  next person. This is intentional — each person's lookup is independent, so
+  there's no reason to carry the previous conversation forward.
+
+  Within each processQuery, the agent does:
+  1. Calls get_person_locations → gets all coordinates where this person was
+  spotted
+  2. Calls calculate_min_distances → returns distance to each power plant (from
+  the closest sighting)
+  3. Calls save_person_distances → appends one row to distances.csv
+
+  ▎ Is step 1 a Function Call? Yes. A "Function Call" (also called "Tool Use") 
+  means: instead of replying with text, the AI replies with a request to run one
+   of your tools. You defined a tool called get_person_locations. The AI says 
+  "run this tool with these arguments". Your JavaScript code runs it (making the
+   HTTP request), and sends the result back. The AI then decides what to do 
+  next. So yes, fetching coordinates from the API is handled via Function 
+  Calling.
+
+  ---
+  Phase 2 — Analysis (pure JavaScript, no AI)
+
+  After Phase 1 finishes, app.js reads distances.csv in plain JavaScript and
+  finds the single row with the smallest distance across all people and all
+  power plants. This gives us: name, surname, born, powerPlantCode, 
+  closestDistanceKm.
+
+  ▎ Why no AI here? Finding a minimum in a table is deterministic math. Letting 
+  an AI "read a CSV and do math" is unreliable — it can make rounding errors or 
+  miss rows. Pure JavaScript is more accurate and faster for this.
+
+  ---
+  Phase 3 — Get access level and submit (one agent call)
+
+  app.js passes the Phase 2 result into a new processQuery. The agent knows who
+  the closest person is. It then:
+
+  1. Calls get_access_level(name, surname, birthYear) → returns {accessLevel: 
+  number}
+  2. Presents the findings in plain English
+  3. Asks you: "Should I send the answer?"
+  4. If you confirm, calls send_answer(...) → saves send.json, POSTs to /verify,
+   prints the server response (including the flag if correct)
+
+  ▎ Why ask before sending? The task counts submissions — you don't want to 
+  waste them with wrong data. The agent presents the full answer for you to 
+  review first.
+
+  ---
+  The 5 Tools
+
+  Tool: get_person_locations
+  Phase: 1
+  Input: name (string), surname (string)
+  Output: [{lat, lon}, ...] array
+  What it does in JavaScript: HTTP POST to /api/location
+  ────────────────────────────────────────
+  Tool: calculate_min_distances
+  Phase: 1
+  Input: locations array of {lat, lon}
+  Output: [{city, code, min_distance_km}] sorted closest first
+  What it does in JavaScript: Haversine formula against pre-loaded plant
+    coordinates
+  ────────────────────────────────────────
+  Tool: save_person_distances
+  Phase: 1
+  Input: name, surname, born, distances[]
+  Output: {success: true}
+  What it does in JavaScript: Appends one row to distances.csv
+  ────────────────────────────────────────
+  Tool: get_access_level
+  Phase: 3
+  Input: name, surname, birthYear (number)
+  Output: {accessLevel: number}
+  What it does in JavaScript: HTTP POST to /api/accesslevel
+  ────────────────────────────────────────
+  Tool: send_answer
+  Phase: 3
+  Input: name, surname, accessLevel, powerPlant
+  Output: server response text
+  What it does in JavaScript: Saves send.json, HTTP POST to /verify, returns
+  flag
+
+  ---
+  Improvements over your original proposal
+
+  1. All locations, not just the last one.
+  Your proposal said "last coordinates of the person." But the location API
+  returns a list of coordinates — every place the person was ever spotted. If
+  the suspect visited a power plant in the morning but was seen elsewhere later,
+   using only "last coordinates" would miss it entirely. calculate_min_distances
+   receives the full list and returns the minimum distance across all sightings
+  for each plant.
+
+  2. Geocode power plant cities once at startup, not inside the tool.
+  The power plants are given as city names ("Grudziądz", "Tczew", etc.), not
+  coordinates. To use Haversine, you need lat/lon. Your proposal suggested
+  passing a city name to the distance tool on every call. That would mean
+  geocoding the same 7 cities 5 times (once per person). Instead, app.js calls a
+   geocoder.js function once at startup using Nominatim (a free OpenStreetMap
+  geocoding API). The coordinates are stored in memory and passed into the tool
+  handlers as a constant. Faster and cleaner.
+
+  ▎ What is Nominatim? It is a free service by OpenStreetMap. You give it a city
+   name, it gives back lat/lon coordinates. No API key needed.
+
+  3. Pure JavaScript for Phase 2.
+  Already explained above. Math in JS is more reliable than asking an LLM to
+  analyze a CSV file.
+
+  4. CSV is appended row by row, not written at the end.
+  If the script crashes on person 4 of 5, the first 3 are already saved. You
+  won't lose data. This also means you could add a "skip if already processed"
+  check later.
+
+  5. The agent loop in Phase 3 asks for confirmation before sending.
+  The system prompt for Phase 3 instructs the agent: "Do not call send_answer 
+  until the user explicitly confirms." So the agent will show you the full
+  answer object and wait for your "yes" before submitting.
+
+  6. The server response is printed.
+  The send_answer handler returns the full HTTP response body as a string, which
+   the agent will include in its final message. So if the answer is correct, the
+   flag ({FLG:...}) will appear in your terminal.
+
+  ---
+  Data flow summary
+
+  people.json
+      │
+      ▼
+  [ Phase 1 loop — one processQuery() per person ]
+      │
+      │  agent calls: get_person_locations(name, surname)
+      │       → [{lat: 53.48, lon: 18.75}, ...]     ← list of sightings
+      │
+      │  agent calls: calculate_min_distances(locations)
+      │       → [{city: "Grudziądz", code: "PWR7264PL", min_distance_km: 0.3},
+  ...]
+      │
+      │  agent calls: save_person_distances(...)
+      │       → row appended to distances.csv
+      │
+      ▼
+  distances.csv
+      │
+      ▼
+  [ Phase 2 — pure JavaScript ]
+      │
+      │  reads CSV, finds minimum distance globally
+      │  → { name, surname, born, powerPlantCode, distanceKm }
+      │
+      ▼
+  [ Phase 3 — one processQuery() ]
+      │
+      │  agent calls: get_access_level(name, surname, birthYear)
+      │       → { accessLevel: 4 }
+      │
+      │  agent presents answer, waits for your confirmation
+      │
+      │  you: "yes, send it"
+      │
+      │  agent calls: send_answer(name, surname, accessLevel, powerPlant)
+      │       → saves output/send.json
+      │       → POST /verify
+      │       → prints server response (flag!)
+      │
+      ▼
+    Done.
+
+  ---
+  One open question before I start coding
+
+  Your people.json already has the born year (e.g. 1987) as a plain integer. But
+   the /api/accesslevel endpoint requires birthYear as an integer too. Your data
+   is already in the right format, so no parsing needed.
+
+  Are you happy with this plan? If so, I'll start building — beginning with
+  package.json, config.js, haversine.js, geocoder.js, csv.js, then tools/, then
+  executor.js, and finally app.js. Let me know if you want any part of the plan
+  changed first.
+
+✻ Brewed for 2m 57s
+
+❯ let's build!                                                                  
+
+● Let me read the remaining source files from 01_02_tool_use I haven't seen yet.
+
+  Read 5 files (ctrl+o to expand)
+
+● Let me also check the root config.
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● Bash(cat "C:\VSCODE\4th-devs_weeks\week1-2\.env" 2>/dev/null | sed
+      's/=.*/=<hidden>/')
+  ⎿  HUB_API_KEY=<hidden>
+  ⎿  Invalid tool parameters
+● Write(01_02_task\package.json)
+  ⎿  Wrote 11 lines to 01_02_task\package.json
+       1 {
+       2   "name": "01_02_task",
+       3   "version": "1.0.0",
+       4   "type": "module",
+       5   "description": "findhim - identify suspect near nuclear power 
+         plant using agent + function calling",
+       6   "main": "app.js",
+       7   "scripts": {
+       8     "start": "node app.js"
+       9   },
+      10   "license": "ISC"
+     … +1 line (ctrl+o to expand)
+
+● Write(01_02_task\src\config.js)
+  ⎿  Wrote 43 lines to 01_02_task\src\config.js
+       1 // This import triggers the root .env loader, which makes HUB_AP
+         I_KEY available
+       2 // via process.env. It also gives us resolveModelForProvider() t
+         o pick the right
+       3 // model name depending on whether we are using OpenAI or OpenRo
+         uter.
+       4 import { resolveModelForProvider } from "../../config.js";
+       5 
+       6 const HUB_API_KEY = process.env.HUB_API_KEY?.trim() ?? "";
+       7 
+       8 if (!HUB_API_KEY) {
+       9   console.error("Error: HUB_API_KEY is not set in the root .env 
+         file");
+      10   process.exit(1);
+     … +33 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\api.js)
+  ⎿  Wrote 98 lines to 01_02_task\src\api.js
+       1 // This file has two responsibilities:
+       2 //   1. Talk to the AI model (OpenAI / OpenRouter) — same as in 
+         01_02_tool_use
+       3 //   2. Provide a helper for calling the course Hub API endpoint
+         s
+       4 
+       5 import { AI_API_KEY, EXTRA_API_HEADERS, RESPONSES_API_ENDPOINT }
+          from "../../config.js";
+       6 import { hubBaseUrl } from "./config.js";
+       7 
+       8 // -------------------------------------------------------------
+         --------------
+       9 // AI chat — sends a conversation to the model and returns the r
+         aw response.
+      10 // -------------------------------------------------------------
+         --------------
+     … +88 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\executor.js)
+  ⎿  Wrote 103 lines to 01_02_task\src\executor.js
+       1 // The executor is the heart of the agent loop.
+       2 // It keeps sending the conversation to the AI until the AI stop
+         s calling tools
+       3 // and gives us a final text answer — or until we hit the safety
+          limit.
+       4 //
+       5 // This file is intentionally identical in structure to 01_02_to
+         ol_use/src/executor.js.
+       6 // The same loop pattern works for any set of tools.
+       7 
+       8 import { chat, extractToolCalls, extractText } from "./api.js";
+       9 
+      10 // Safety limit: if the AI calls more than this many rounds of t
+         ools without
+     … +93 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\haversine.js)
+  ⎿  Wrote 44 lines to 01_02_task\src\haversine.js
+      1 // The Haversine formula calculates the "as the crow flies" dista
+        nce between
+      2 // two points on a sphere (the Earth) given their latitude and lo
+        ngitude.
+      3 //
+      4 // Why not just subtract the coordinates?
+      5 // Latitude and longitude are angles, not distances. One degree o
+        f latitude is
+      6 // always ~111 km, but one degree of longitude shrinks as you mov
+        e toward the
+      7 // poles. Haversine accounts for the Earth's curvature correctly.
+      8 //
+      9 // This module has no dependencies — it is pure maths.
+     … +34 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\geocoder.js)
+  ⎿  Wrote 94 lines to 01_02_task\src\geocoder.js
+      1 // The geocoder converts city names (like "Grudziądz") into latit
+        ude/longitude
+      2 // coordinates that we can use with the Haversine formula.
+      3 //
+      4 // We use Nominatim — a free geocoding service built on OpenStree
+        tMap data.
+      5 // No API key is needed, but the rules say: maximum 1 request per
+         second,
+      6 // and you must include a User-Agent header identifying your app.
+      7 //
+      8 // We geocode all power plant cities ONCE at startup, then store 
+        the results
+      9 // in memory. This avoids repeating 7 geocoding calls for every s
+        uspect.
+     … +84 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\csv.js)
+  ⎿  Wrote 109 lines to 01_02_task\src\csv.js
+      1 // This module handles reading and writing the distances CSV file
+        .
+      2 //
+      3 // The CSV is the "memory" that survives between each person's ag
+        ent call.
+      4 // Because we clear the conversation context between persons, the
+         CSV is
+      5 // the only place where results accumulate. After all persons are
+         processed,
+      6 // Phase 2 reads this file to find the closest person overall.
+      7 //
+      8 // CSV format:
+      9 //   name,surname,born,city,<plant1>_km,...,<plantN>_km,closest_p
+        lant,closest_plant_code,closest_distance_km
+     … +99 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\tools\definitions.js)
+  ⎿  Wrote 213 lines to 01_02_task\src\tools\definitions.js
+       1 // Tool definitions are JSON Schema objects that describe our to
+         ols to the AI model.
+       2 // The AI reads these descriptions and decides which tool to cal
+         l and with what arguments.
+       3 //
+       4 // Each tool definition has:
+       5 //   type        — always "function" for function-calling tools
+       6 //   name        — unique identifier (must match the handler key
+          exactly)
+       7 //   description — plain-English explanation that helps the AI u
+         nderstand WHEN to use it
+       8 //   parameters  — JSON Schema describing the input the tool acc
+         epts
+       9 //   strict      — true means the AI must follow the schema exac
+         tly (no extra fields)
+      10 //
+     … +203 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\tools\handlers.js)
+  ⎿  Wrote 156 lines to 01_02_task\src\tools\handlers.js
+       1 // Handlers are the actual JavaScript functions that run when th
+         e AI calls a tool.
+       2 //
+       3 // The AI can only "decide" what to call — it cannot run code it
+         self.
+       4 // When it says "call get_person_locations with name=Jacek, surn
+         ame=Nowak",
+       5 // our executor.js picks it up and calls the matching function h
+         ere.
+       6 //
+       7 // We export createHandlers() instead of a plain object because 
+         some handlers
+       8 // need the power plant coordinates (which are geocoded at start
+         up and passed in).
+       9 // This is called a "factory function" — a function that creates
+          and returns another object.
+      10 //
+     … +146 lines (ctrl+o to expand)
+
+● Write(01_02_task\src\tools\index.js)
+  ⎿  Wrote 4 lines to 01_02_task\src\tools\index.js
+      1 // Single export point for everything tools-related.
+      2 // app.js imports from here so it doesn't need to know about the 
+        internal file layout.
+      3 export { phase1Tools, phase3Tools } from "./definitions.js";
+      4 export { createHandlers } from "./handlers.js";
+● Write(01_02_task\app.js)
+  ⎿  Wrote 169 lines to 01_02_task\app.js
+       1 // =============================================================
+         ===============
+       2 // app.js — Main entry point for the "findhim" agent
+       3 // =============================================================
+         ===============
+       4 //
+       5 // This script runs in three phases:
+       6 //
+       7 //   Phase 1 — Data collection
+       8 //     For each suspect in people.json, an agent conversation is
+          started.
+       9 //     The agent calls three tools: get_person_locations, calcul
+         ate_min_distances,
+      10 //     save_person_distances. After each person, the conversatio
+         n is discarded
+     … +159 lines (ctrl+o to expand)
+
+● All files are written. Let me verify the structure looks correct:
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● All 11 files created. Here's a summary of what was built and how to run it:
+
+  ---
+  How to run
+
+  cd 01_02_task
+  node app.js
+
+  No npm install needed — all modules used (fs/promises, readline, path) are
+  built into Node.js.
+
+  ---
+  What will happen when you run it
+
+  Startup (~8 seconds): Nominatim geocodes the 7 power plant cities one by one
+  (1 sec delay each to respect the rate limit). You'll see coordinates printed
+  as they come in.
+
+  Phase 1 (~5 agent calls): For each of your 5 suspects, a full agent loop runs.
+   You'll see the → get_person_locations(...), → calculate_min_distances(...), →
+   save_person_distances(...) lines as the AI calls each tool. Then the
+  conversation is discarded and the next person starts fresh.
+
+  Phase 2 (instant): Pure JavaScript reads output/distances.csv and prints the
+  closest suspect and their distance.
+
+  Confirmation prompt: You type y or n. If n, the script exits cleanly with the
+  CSV saved.
+
+  Phase 3: The agent calls get_access_level, then send_answer. The server
+  response (hopefully containing {FLG:...}) is printed to the terminal. The
+  payload is also saved to output/send.json.
+
+✻ Crunched for 7m 24s
+
+❯ what does distances.csv contain?                                              
+
+● Based on the code in csv.js and handlers.js, here's exactly what it will look
+  like after Phase 1 runs:
+
+  Header row (built in initializeCsv)
+
+  name,surname,born,city,Zabrze_km,Piotrków
+  Trybunalski_km,Grudziądz_km,Tczew_km,Radom_km,Chelmno_km,Żarnowiec_km,closest_
+  plant,closest_plant_code,closest_distance_km
+
+  One column per power plant (named {city}_km), plus three summary columns at
+  the end.
+
+  Data rows (one per suspect, appended in appendPersonRow)
+
+  Cezary,Żurek,1987,Grudziądz,312.451,278.003,0.823,45.112,189.334,52.441,201.77
+  8,Grudziądz,PWR7264PL,0.823
+  Jacek,Nowak,1991,Grudziądz,311.002,277.100,0.541,44.980,188.991,51.887,200.912
+  ,Grudziądz,PWR7264PL,0.541
+  ...
+
+  Each number is the minimum distance in km between that person and that power
+  plant — meaning the closest any of their sightings ever got to it.
+
+  The three summary columns
+
+  ┌─────────────────────┬───────────┬────────────────────────────────────────┐
+  │       Column        │  Example  │             What it means              │
+  ├─────────────────────┼───────────┼────────────────────────────────────────┤
+  │ closest_plant       │ Grudziądz │ The name of the nearest power plant    │
+  ├─────────────────────┼───────────┼────────────────────────────────────────┤
+  │ closest_plant_code  │ PWR7264PL │ Its code (what we submit to /verify)   │
+  ├─────────────────────┼───────────┼────────────────────────────────────────┤
+  │ closest_distance_km │ 0.541     │ The winning distance — smallest across │
+  │                     │           │  all 7 plants                          │
+  └─────────────────────┴───────────┴────────────────────────────────────────┘
+
+  What Phase 2 does with it
+
+  findClosestPerson() in csv.js scans the closest_distance_km column across all
+  5 rows and picks the single smallest value. That person is your suspect.
+
+❯ ok, so we first calculat the distance from all the locations of a single      
+person to the every power plant, so can be a lot of data? And from that we      
+extract and save just the minimum value?                                        
+
+● Exactly right. Here's the full picture:
+
+  What the location API returns for one person — multiple sightings:
+  Jacek Nowak was spotted at:
+    [53.481, 18.751]   ← near Grudziądz
+    [52.234, 21.012]   ← Warsaw area
+    [50.061, 19.938]   ← Kraków area
+    [54.352, 18.646]   ← Gdańsk area
+
+  What calculate_min_distances does with that:
+
+  For each power plant, it runs Haversine against every single sighting, then
+  keeps only the smallest result:
+
+  Power plant: Grudziądz (PWR7264PL) at [53.484, 18.753]
+    → distance from sighting 1: 0.541 km   ← MINIMUM kept
+    → distance from sighting 2: 298.3 km
+    → distance from sighting 3: 456.2 km
+    → distance from sighting 4: 112.8 km
+
+  Power plant: Radom at [51.402, 21.146]
+    → distance from sighting 1: 312.4 km
+    → distance from sighting 2: 89.1 km    ← MINIMUM kept
+    → distance from sighting 3: 167.3 km
+    → distance from sighting 4: 389.2 km
+
+  What gets saved to the CSV — just the minimums:
+  Jacek,Nowak,...,Grudziądz_km: 0.541, Radom_km: 89.1, ...
+
+  So all that intermediate maths happens in memory and is thrown away. The CSV
+  only stores the closest the person ever got to each plant, not every
+  individual calculation.
+
+  This is important because it answers the right question: "Did this person 
+  visit a power plant?" — not "Where were they on average?"
+
+❯ so the locations of power plant are checked with the API every time I run     
+app.js? Let's save the after first run and build a logic in the tool that will  
+first make it check whether the coordinates are already known. Does that even   
+makes sense?                                                                    
+
+● Yes, it makes total sense! It's a very common pattern called caching — saving
+  the result of an expensive operation so you don't repeat it next time.
+
+  Right now every run geocodes 7 cities × ~1.1 seconds = ~8 seconds of waiting
+  before anything useful happens. That's annoying when you're debugging or
+  re-running.
+
+  The logic would be:
+
+  On startup:
+    Does output/power_plants_geocoded.json exist?
+      YES → load it, skip Nominatim entirely
+      NO  → geocode all cities, save the result to that file, use it
+
+  This is called a cache file — a saved copy of data that was slow to fetch. It
+  only needs to be fetched once. If you ever want fresh coordinates, you just
+  delete the file and run again.
+
+  The change only touches geocoder.js — everything else stays the same. Want me
+  to update that file?
+
+❯ Hmm I think I rather have a more granular check, I mean: check if the file    
+exists and check if the power plant is there. In case I would want to add       
+another power plant in the future (which I probably not), does that makes       
+sense?                                                                          
+
+● Yes, makes sense. The logic becomes:
+
+  For each power plant city:
+    Is this city already in the cache file?
+      YES → use saved coordinates, skip Nominatim
+      NO  → geocode it, add it to the cache file, use it
+
+  So the cache file grows incrementally. If you add a new city to
+  findhim_locations.json, only that new city gets geocoded on the next run. The
+  others are loaded instantly.
+
+  The cache file would look like this:
+
+  {
+    "Grudziądz": { "lat": 53.4837, "lon": 18.7534 },
+    "Tczew":     { "lat": 53.7784, "lon": 18.7999 },
+    "Radom":     { "lat": 51.4027, "lon": 21.1471 }
+  }
+
+  Simple key-value — city name → coordinates. Easy to read, easy to edit
+  manually if needed.
+
+  Shall I update geocoder.js?
+
+❯ yes                                                                           
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(01_02_task\src\geocoder.js)
+  ⎿  Added 70 lines, removed 17 lines
+       5  // No API key is needed, but the rules say: maximum 1 request p
+          er second,
+       6  // and you must include a User-Agent header identifying your ap
+          p.
+       7  //
+       8 -// We geocode all power plant cities ONCE at startup, then stor
+         -e the results                                                  
+       9 -// in memory. This avoids repeating 7 geocoding calls for every
+         - suspect.                                                      
+       8 +// CACHING: coordinates are saved to output/geocode_cache.json 
+         +after the first                                                
+       9 +// lookup. On every subsequent run, each city is checked agains
+         +t the cache first.                                             
+      10 +// Only cities that are NOT in the cache trigger a real Nominat
+         +im request.                                                    
+      11 +// This means the first run is slow (~8s), but all later runs a
+         +re instant.                                                    
+      12 +// To force a re-fetch for a city, just delete its entry from t
+         +he cache file.                                                 
+      13  
+      14 +import { readFile, writeFile, mkdir } from "fs/promises";      
+      15 +import { existsSync } from "fs";                               
+      16 +import { resolve } from "path";                                
+      17 +                                                               
+      18  const NOMINATIM_URL = "https://nominatim.openstreetmap.org/sear
+          ch";
+      19 +const OUTPUT_DIR = resolve(import.meta.dirname, "..", "output")
+         +;                                                              
+      20 +const CACHE_PATH = resolve(OUTPUT_DIR, "geocode_cache.json");  
+      21  
+      22  // sleep() pauses execution for a given number of milliseconds.
+      23  // We use this to respect Nominatim's rate limit (1 request/sec
+          ond).
+     ...
+      26  // Returns:   a Promise that resolves after the delay
+      27  const sleep = (ms) => new Promise((resolve) => setTimeout(resol
+          ve, ms));
+      28  
+      29 +// loadCache() reads the cache file from disk and returns its c
+         +ontents.                                                       
+      30 +// If the file doesn't exist yet, returns an empty object — sam
+         +e as an empty cache.                                           
+      31 +//                                                             
+      32 +// Returns: Promise<object>  e.g. { "Grudziądz": { lat: 53.48, 
+         +lon: 18.75 }, ... }                                            
+      33 +const loadCache = async () => {                                
+      34 +  if (!existsSync(CACHE_PATH)) return {};                      
+      35 +  const content = await readFile(CACHE_PATH, "utf-8");         
+      36 +  return JSON.parse(content);                                  
+      37 +};                                                             
+      38 +                                                               
+      39 +// saveCache() writes the current cache object back to disk.   
+      40 +// Called every time a new city is added so the file is always 
+         +up to date.                                                    
+      41 +//                                                             
+      42 +// Parameter: cache — object mapping city names to { lat, lon }
+      43 +const saveCache = async (cache) => {                           
+      44 +  await mkdir(OUTPUT_DIR, { recursive: true });                
+      45 +  await writeFile(CACHE_PATH, JSON.stringify(cache, null, 2), "
+         +utf-8");                                                       
+      46 +};                                                             
+      47 +                                                               
+      48  // geocodeCity() asks Nominatim for the lat/lon of one city in 
+          Poland.
+      49  //
+      50  // Parameter: city — string, e.g. "Grudziądz"
+     ...
+      86  
+      87  // geocodePowerPlants() processes the full findhim_locations.js
+          on object
+      88  // and returns an array of power plant objects enriched with co
+          ordinates.
+      89 +// Checks the cache for each city before calling Nominatim.    
+      90  //
+      91  // Parameter:
+      92  //   locations — the parsed JSON object from findhim_locations.
+          json
+     ...
+       95  // Returns: Promise<Array<{ city: string, code: string, lat: n
+           umber, lon: number }>>
+       96  export const geocodePowerPlants = async (locations) => {
+       97    const cities = Object.keys(locations.power_plants);
+       98 +                                                              
+       99 +  // Load whatever coordinates we already saved from previous 
+          +runs.                                                         
+      100 +  const cache = await loadCache();                            
+      101 +                                                              
+      102    const result = [];
+      103 +  let fetchCount = 0;                                         
+      104  
+       71 -  console.log(`\nGeocoding ${cities.length} power plant cities
+          -...`);                                                        
+      105 +  console.log(`\nResolving coordinates for ${cities.length} po
+          +wer plant cities...`);                                        
+      106  
+      107    for (const city of cities) {
+       74 -    process.stdout.write(`  ${city}... `);                    
+       75 -    const { lat, lon } = await geocodeCity(city);             
+       76 -    console.log(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);      
+      108 +    if (cache[city]) {                                        
+      109 +      // Cache hit — no network request needed.               
+      110 +      const { lat, lon } = cache[city];                       
+      111 +      console.log(`  ${city}: ${lat.toFixed(4)}, ${lon.toFixed
+          +(4)}  (cached)`);                                             
+      112  
+       78 -    result.push({                                             
+       79 -      city,                                                   
+       80 -      code: locations.power_plants[city].code,                
+       81 -      lat,                                                    
+       82 -      lon                                                     
+       83 -    });                                                       
+      113 +      result.push({ city, code: locations.power_plants[city].c
+          +ode, lat, lon });                                             
+      114 +    } else {                                                  
+      115 +      // Cache miss — fetch from Nominatim, then save to cache
+          +.                                                             
+      116 +      process.stdout.write(`  ${city}: fetching... `);        
+      117  
+       85 -    // Wait 1.1 seconds before the next request to stay within
+          - Nominatim's rate limit.                                      
+       86 -    // We skip the delay after the last city to avoid unnecess
+          -ary waiting.                                                  
+       87 -    if (city !== cities[cities.length - 1]) {                 
+       88 -      await sleep(1100);                                      
+      118 +      const { lat, lon } = await geocodeCity(city);           
+      119 +      console.log(`${lat.toFixed(4)}, ${lon.toFixed(4)}  (fetc
+          +hed)`);                                                       
+      120 +                                                              
+      121 +      // Add to cache object and immediately persist it.      
+      122 +      // If the script crashes mid-loop, already-fetched citie
+          +s are still saved.                                            
+      123 +      cache[city] = { lat, lon };                             
+      124 +      await saveCache(cache);                                 
+      125 +                                                              
+      126 +      result.push({ city, code: locations.power_plants[city].c
+          +ode, lat, lon });                                             
+      127 +      fetchCount++;                                           
+      128 +                                                              
+      129 +      // Only wait if there are more cities to fetch after thi
+          +s one.                                                        
+      130 +      // We check the remaining cities — not just "is this the
+          + last city overall"                                           
+      131 +      // because the next city might be a cache hit and needs 
+          +no delay.                                                     
+      132 +      const remainingCities = cities.slice(cities.indexOf(city
+          +) + 1);                                                       
+      133 +      const nextNeedsFetch = remainingCities.some((c) => !cach
+          +e[c]);                                                        
+      134 +      if (nextNeedsFetch) {                                   
+      135 +        await sleep(1100);                                    
+      136 +      }                                                       
+      137      }
+      138    }
+      139  
+       92 -  console.log("Geocoding complete.\n");                       
+      140 +  if (fetchCount === 0) {                                     
+      141 +    console.log("All cities loaded from cache.\n");           
+      142 +  } else {                                                    
+      143 +    console.log(`Fetched ${fetchCount} new cities, ${cities.le
+          +ngth - fetchCount} from cache.\n`);                           
+      144 +  }                                                           
+      145 +                                                              
+      146    return result;
+      147  };
+
+● Key changes made:
+
+  Two new private functions:
+  - loadCache() — reads output/geocode_cache.json from disk, returns {} if it
+  doesn't exist yet
+  - saveCache(cache) — writes the cache back to disk immediately after each new
+  fetch
+
+  The loop now has two paths per city:
+  - Cache hit → print (cached), use saved coordinates, no delay needed
+  - Cache miss → fetch from Nominatim, print (fetched), save cache to disk right
+   away, apply the 1.1s delay only if the next uncached city still needs
+  fetching
+
+  That last detail matters — if you have 3 cities cached and 1 new one, the
+  delay only fires once (before the new fetch), not between cached cities where
+  there's nothing to wait for.
+
+  After the first run, output/geocode_cache.json will look like:
+  {
+    "Grudziądz": { "lat": 53.4837, "lon": 18.7534 },
+    "Tczew":     { "lat": 53.7784, "lon": 18.7999 },
+    ...
+  }
+
+✻ Brewed for 34s
+
+❯ ok, one more thing, let's make a send function a seperate tool in \tools. I   
+might reuse it many times. Makes sense?                                         
+
+● Yes, makes total sense. A generic "send answer to the Hub" function is useful
+  across all tasks in this course — same endpoint, same payload shape every
+  time.
+
+  The plan:
+  - Create tools/send.js — a standalone async function that takes the payload
+  and POSTs to /verify
+  - Update handlers.js to import and use it instead of having the logic inline
+
+  Small and clean. Let me do it.
+
+  Read 1 file (ctrl+o to expand)
+
+● Write(01_02_task\src\tools\send.js)
+  ⎿  Wrote 56 lines to 01_02_task\src\tools\send.js
+      1 // send.js — reusable function for submitting answers to the cour
+        se Hub.
+      2 //
+      3 // Every task in the course uses the same /verify endpoint with t
+        he same
+      4 // payload shape: { apikey, task, answer }. Rather than copy-past
+        ing this
+      5 // logic into every project, we keep it here and import it wherev
+        er needed.
+      6 //
+      7 // Usage example:
+      8 //   import { sendAnswer } from "./tools/send.js";
+      9 //   const response = await sendAnswer({ task: "findhim", answer:
+         { ... } });
+     … +46 lines (ctrl+o to expand)
+
+● Now update handlers.js to use it:
+
+● Update(01_02_task\src\tools\handlers.js)
+  ⎿  Added 1 line, removed 4 lines
+      11  // Python analogy: it is like a class __init__ that stores stat
+          e (powerPlants)
+      12  // which the methods (handlers) can then access.
+      13  
+      14 -import { writeFile } from "fs/promises";                       
+      15 -import { resolve } from "path";                                
+      14  import { hubApiKey, hubBaseUrl } from "../config.js";
+      15  import { haversineDistance } from "../haversine.js";
+      16  import { appendPersonRow } from "../csv.js";
+      17 +import { sendAnswer } from "./send.js";                        
+      18  
+      20 -const OUTPUT_DIR = resolve(import.meta.dirname, "..", "..", "ou
+         -tput");                                                        
+      21 -                                                               
+      19  // hubPost() is a private helper (not exported) used only insid
+          e this module.
+      20  // It sends a POST request to a Hub endpoint and returns parsed
+           JSON.
+      21  const hubPost = async (endpoint, body) => {
+
+● Update(01_02_task\src\tools\handlers.js)
+  ⎿  Added 2 lines, removed 11 lines
+      136    // Saves send.json, calls POST /verify → returns server resp
+           onse (flag!)
+      137    // ---------------------------------------------------------
+           ------------------
+      138    async send_answer({ name, surname, accessLevel, powerPlant }
+           ) {
+      139 -    const payload = {                                         
+      140 -      apikey: hubApiKey,                                      
+      139 +    return sendAnswer({                                       
+      140        task: "findhim",
+      141        answer: { name, surname, accessLevel, powerPlant }
+      143 -    };                                                        
+      144 -                                                              
+      145 -    // Save the payload locally before sending — useful for de
+          -bugging.                                                      
+      146 -    const sendPath = resolve(OUTPUT_DIR, "send.json");        
+      147 -    await writeFile(sendPath, JSON.stringify(payload, null, 2)
+          -, "utf-8");                                                   
+      148 -    console.log(`    Payload saved to output/send.json`);     
+      149 -                                                              
+      150 -    const response = await hubPost("/verify", payload);       
+      151 -    return response;                                          
+      142 +    });                                                       
+      143    }
+      144  });
+
+● Done. The structure now looks like:
+
+  src/tools/
+  ├── send.js          ← reusable, knows nothing about "findhim" specifically
+  ├── handlers.js      ← calls sendAnswer() with the task-specific payload
+  ├── definitions.js
+  └── index.js
+
+  In a future task you just do:
+
+  import { sendAnswer } from "../01_02_task/src/tools/send.js";
+  // or copy send.js into the new project — it only depends on config.js
+
+  The send.js function itself has no knowledge of what "findhim" is — it just
+  takes task and answer and handles the boilerplate. The task-specific part
+  (task: "findhim", the shape of answer) stays in handlers.js where it belongs.
+
+✻ Cogitated for 33s
+
+❯ I think we might have a bug while creating the distances.csv, the minimum     
+distance is filtered correctly, however the corresponding power plant (and      
+probably its code) not. In line 5 for Wojciech Bielik we have a minimum         
+distance to Zabrze, but the answer is Chelmno?                                  
+
+● Good catch. There are actually two related bugs here:
+
+  1. Column misalignment: initializeCsv writes the header in the original order
+  from findhim_locations.json (Zabrze, Piotrków, Grudziądz...), but
+  appendPersonRow writes the distance values in sorted order (closest first). So
+   every value ends up under the wrong column header.
+  2. Wrong closest: because the values are misaligned, the number that looks
+  smallest in the row is under the wrong city name.
+
+  The fix: appendPersonRow needs to know the original power plant order so it
+  can look up each plant's distance by city name. It already has access to
+  powerPlants via the handler closure — we just need to pass it through.
+
+  Read 1 file (ctrl+o to expand)
+● Update(01_02_task\src\csv.js)
+  ⎿  Added 19 lines, removed 8 lines
+      43  //   surname     — string
+      44  //   born        — number (birth year, e.g. 1987)
+      45  //   personCity  — string (the person's home city from people.j
+          son)
+      46 -//   distances   — array of { city, code, min_distance_km } sor
+         -ted ascending                                                  
+      47 -//                 (so distances[0] is the closest power plant)
+      48 -export const appendPersonRow = async (name, surname, born, pers
+         -onCity, distances) => {                                        
+      49 -  // distances[0] is the closest because calculate_min_distance
+         -s sorts ascending.                                             
+      50 -  const closest = distances[0];                                
+      46 +//   distances   — array of { city, code, min_distance_km } (ma
+         +y be in any order)                                             
+      47 +//   powerPlants — array of { city, code, lat, lon } in the ori
+         +ginal header order                                             
+      48 +//                                                             
+      49 +// Why powerPlants is needed:                                  
+      50 +//   The header columns were written in the original findhim_lo
+         +cations.json order.                                            
+      51 +//   The distances array arriving from the agent may be sorted 
+         +differently.                                                   
+      52 +//   Without matching them by city name, values land under the 
+         +wrong column headers.                                          
+      53 +export const appendPersonRow = async (name, surname, born, pers
+         +onCity, distances, powerPlants) => {                           
+      54 +  // Find the closest plant by scanning all entries for the sma
+         +llest distance.                                                
+      55 +  // We do NOT rely on distances[0] because the agent may reord
+         +er the array.                                                  
+      56 +  const closest = distances.reduce((min, d) =>                 
+      57 +    d.min_distance_km < min.min_distance_km ? d : min          
+      58 +  );                                                           
+      59  
+      52 -  // Build the distance columns: one number per plant, comma-se
+         -parated.                                                       
+      53 -  // toFixed(3) rounds to 3 decimal places (metres precision). 
+      54 -  const distColumns = distances.map((d) => d.min_distance_km.to
+         -Fixed(3)).join(",");                                           
+      60 +  // Write distance columns in the same order as the header (or
+         +iginal plant order).                                           
+      61 +  // For each plant in the header, find its entry in distances 
+         +by city name.                                                  
+      62 +  const distColumns = powerPlants.map((plant) => {             
+      63 +    const match = distances.find((d) => d.city === plant.city);
+      64 +    return match ? match.min_distance_km.toFixed(3) : "N/A";   
+      65 +  }).join(",");                                                
+      66  
+      67    const row = `${name},${surname},${born},${personCity},${distC
+          olumns},${closest.city},${closest.code},${closest.min_distance_
+          km.toFixed(3)}\n`;
+      68  
+
+● Now update the handler to pass powerPlants through:
+
+● Update(01_02_task\src\tools\handlers.js)
+  ⎿  Added 2 lines, removed 1 line
+      109    // Appends one row to the CSV file.
+      110    // ---------------------------------------------------------
+           ------------------
+      111    async save_person_distances({ name, surname, born, personCit
+           y, distances }) {
+      112 -    await appendPersonRow(name, surname, born, personCity, dis
+          -tances);                                                      
+      112 +    // Pass powerPlants so appendPersonRow can write columns i
+          +n the correct order.                                          
+      113 +    await appendPersonRow(name, surname, born, personCity, dis
+          +tances, powerPlants);                                         
+      114      return {
+      115        success: true,
+      116        message: `Saved distances for ${name} ${surname} to CSV`
+
+● Two changes, both in csv.js:
+
+  Bug 1 — wrong closest plant: replaced distances[0] with distances.reduce(...)
+  which scans every entry and picks the one with the smallest min_distance_km.
+  No longer assumes any particular order.
+
+  Bug 2 — column misalignment: instead of mapping over distances directly, we
+  now map over powerPlants (the original order) and look up each city by name in
+   the distances array using .find(). So the value for Grudziądz always lands in
+   the Grudziądz column, regardless of how the agent ordered the array it passed
+   back.
+
+✻ Baked for 1m 18s
+
+❯ shall I delete the distances.csv or this one get overwritten completely?      
+
+● It gets overwritten completely every run — look at initializeCsv in csv.js:
+
+  await writeFile(CSV_PATH, header, "utf-8");
+
+  writeFile always creates a fresh file from scratch (as opposed to appendFile
+  which adds to the end). So every time you run node app.js, the CSV starts
+  clean with just the header row, and the 5 persons get appended one by one
+  during Phase 1.
+
+  No need to delete it manually.
+
+❯ hmm, just a sanity check: in this particular example what the LLM really had  
+to generate? We didn't make to calculate the minimum distance, but I received   
+all this data from a tool, right? I started to think that in this example we    
+don't really need any LLM? Try to argue for and against                         
+
+● Good observation. Let me be honest about it.
+
+  ---
+  Against using LLM here (you're largely right)
+
+  In this specific task, the LLM is essentially a glorified for-loop 
+  coordinator. Everything meaningful happens in the tools:
+
+  - get_person_locations — pure HTTP call
+  - calculate_min_distances — pure maths
+  - save_person_distances — pure file write
+  - get_access_level — pure HTTP call
+  - send_answer — pure HTTP call
+
+  You could replace the entire LLM with this in app.js:
+
+  for (const person of people) {
+    const { locations } = await handlers.get_person_locations(person);
+    const { distances } = await handlers.calculate_min_distances(locations);
+    await handlers.save_person_distances({ ...person, distances });
+  }
+  const winner = await findClosestPerson();
+  const access = await handlers.get_access_level(winner);
+  await handlers.send_answer({ ...winner, accessLevel: access.accessLevel });
+
+  Same result. No tokens spent. No rate limits. Faster. More predictable.
+
+  ---
+  For using LLM here
+
+  1. The task explicitly asks you to practice Function Calling. The point of the
+   exercise is to learn the pattern — not to write the most efficient solution.
+  You're building the muscle memory for when it genuinely matters.
+
+  2. The steps aren't always this clean. In real scenarios the API might return
+  unexpected shapes, missing fields, or ambiguous data. An LLM can recover
+  gracefully ("the response had latitude instead of lat, I'll adapt") whereas
+  hardcoded logic just crashes.
+
+  3. Error interpretation. If get_access_level returns {"error": "person not 
+  found"}, the LLM notices and can try a variant of the name. Your hardcoded
+  loop just fails.
+
+  4. The pattern scales. The exact same executor + tool architecture works for
+  tasks where the LLM genuinely reasons — like when it needs to decide which
+  endpoint to call next based on what a previous result said, or when the task
+  description is ambiguous.
+
+  ---
+  The honest conclusion
+
+  This exercise is training wheels for Function Calling. The task was designed
+  to be solvable with simple tools so you focus on learning the pattern, not on
+  a hard problem. The LLM adds real value when the orchestration logic is
+  non-obvious — when it needs to decide rather than just execute in order.
+
+❯ explain in details what we feed LLM with, and what we receive from it at      
+every stage for a single person. And how does it finilises the final answer.    
+
+● Great question. Let me trace through the full conversation for one person —
+  say Jacek Nowak.
+
+  ---
+  What we send on Round 1
+
+  We call chat() with this full payload:
+
+  instructions (system prompt):
+  You are a location analysis agent for a security investigation.
+  You will be given one suspect to investigate.
+  You MUST follow these steps in order:
+  1. Call get_person_locations...
+  2. Call calculate_min_distances...
+  3. Call save_person_distances...
+
+  tools — the 3 JSON schemas describing phase1Tools (the AI reads these to know
+  what tools exist and what arguments each one needs)
+
+  input (the conversation so far — just 1 message):
+  [
+    {
+      "role": "user",
+      "content": "Investigate suspect: Jacek Nowak (born: 1991, home city: 
+  Grudziądz). Get their locations, calculate distances to all power plants, and 
+  save to CSV."
+    }
+  ]
+
+  ---
+  What we receive back — Round 1
+
+  The AI does NOT reply with text. It replies with a tool call request:
+
+  {
+    "output": [
+      {
+        "type": "function_call",
+        "call_id": "call_abc123",
+        "name": "get_person_locations",
+        "arguments": "{\"name\": \"Jacek\", \"surname\": \"Nowak\"}"
+      }
+    ]
+  }
+
+  The AI is saying: "I don't know the answer yet — run this function and give me
+   the result."
+
+  Our executeToolCalls() runs the handler, which POSTs to /api/location and gets
+   back e.g.:
+  { "locations": [{"lat": 53.481, "lon": 18.752}, {"lat": 52.234, "lon":
+  21.011}] }
+
+  ---
+  What we send on Round 2
+
+  We grow the conversation by appending the tool call and its result, then send
+  everything again:
+
+  [
+    { "role": "user", "content": "Investigate suspect: Jacek Nowak..." },
+
+    {
+      "type": "function_call",
+      "call_id": "call_abc123",
+      "name": "get_person_locations",
+      "arguments": "{\"name\": \"Jacek\", \"surname\": \"Nowak\"}"
+    },
+
+    {
+      "type": "function_call_output",
+      "call_id": "call_abc123",
+      "output": "{\"locations\": [{\"lat\": 53.481, \"lon\": 18.752}, {\"lat\": 
+  52.234, \"lon\": 21.011}]}"
+    }
+  ]
+
+  The AI now sees: "I asked for locations and got these back. What should I do 
+  next?"
+
+  ---
+  What we receive back — Round 2
+
+  The AI calls the next tool, passing the locations it just received:
+
+  {
+    "output": [
+      {
+        "type": "function_call",
+        "call_id": "call_def456",
+        "name": "calculate_min_distances",
+        "arguments": "{\"locations\": [{\"lat\": 53.481, \"lon\": 18.752}, 
+  {\"lat\": 52.234, \"lon\": 21.011}]}"
+      }
+    ]
+  }
+
+  Our handler runs the Haversine maths locally and returns:
+  {
+    "distances": [
+      { "city": "Grudziądz", "code": "PWR7264PL", "min_distance_km": 0.541 },
+      { "city": "Chelmno",   "code": "PWR2758PL", "min_distance_km": 51.3 },
+      ...
+    ]
+  }
+
+  ---
+  What we send on Round 3
+
+  The conversation grows again — now 5 items long:
+
+  [
+    { "role": "user", "content": "Investigate suspect: Jacek Nowak..." },
+    { "type": "function_call", "call_id": "call_abc123", "name":
+  "get_person_locations", "arguments": "..." },
+    { "type": "function_call_output", "call_id": "call_abc123", "output":
+  "{\"locations\": [...]}" },
+    { "type": "function_call", "call_id": "call_def456", "name":
+  "calculate_min_distances", "arguments": "..." },
+    { "type": "function_call_output", "call_id": "call_def456", "output":
+  "{\"distances\": [...]}" }
+  ]
+
+  ---
+  What we receive back — Round 3
+
+  The AI calls the final tool:
+
+  {
+    "output": [
+      {
+        "type": "function_call",
+        "call_id": "call_ghi789",
+        "name": "save_person_distances",
+        "arguments": "{\"name\": \"Jacek\", \"surname\": \"Nowak\", \"born\": 
+  1991, \"personCity\": \"Grudziądz\", \"distances\": [...]}"
+      }
+    ]
+  }
+
+  Our handler appends the row to the CSV and returns { "success": true }.
+
+  ---
+  What we send on Round 4
+
+  The conversation is now 7 items long. We send it all again.
+
+  ---
+  What we receive back — Round 4 (final)
+
+  No more tool calls. The AI sees all three tools completed and returns a plain
+  text message:
+
+  {
+    "output_text": "Done. Jacek Nowak was closest to Grudziądz (PWR7264PL) at 
+  0.541 km. Results saved to CSV."
+  }
+
+  extractToolCalls() returns an empty array → the loop exits → extractText()
+  pulls the string → processQuery() returns it.
+
+  ---
+  The key thing to understand
+
+  The AI never holds state between rounds. It has no memory of what happened.
+  Every single round we send the entire conversation from scratch — all previous
+   messages, all tool calls, all results. The AI reads the full history each
+  time and decides what to do next.
+
+  This is why the conversation array keeps growing:
+
+  Round 1 sent: 1 message
+  Round 2 sent: 3 messages  (+ tool call + result)
+  Round 3 sent: 5 messages  (+ tool call + result)
+  Round 4 sent: 7 messages  (+ tool call + result)
+  Round 4 received: text → done
+
+  The "memory" is just the array we pass in. When processQuery() returns and we
+  start the next person, that array is thrown away and we start fresh with 1
+  message again.
+
+❯ So with the very first message apart from the system prompt with the names of 
+ the tools to be used, do we send a schema of these tools as well? I think we   
+should?                                                                         
+
+● Yes, absolutely — the tool schemas are sent every single round, not just the
+  first one.
+
+  Look at chat() in api.js:
+
+  export const chat = async ({ model, input, tools, ... }) => {
+    const body = { model, input };
+
+    if (tools) body.tools = tools;   // ← added to EVERY request
+    ...
+  };
+
+  And in executor.js, the same chatConfig object (which contains tools) is
+  reused on every loop iteration:
+
+  const chatConfig = { model, tools, instructions };  // built once
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+    const response = await chat({ ...chatConfig, input: conversation });  // 
+  tools sent every round
+
+  So the full payload sent on every round looks like this:
+
+  {
+    "model": "gpt-4.1-mini",
+    "instructions": "You are a location analysis agent...",
+    "tools": [
+      {
+        "type": "function",
+        "name": "get_person_locations",
+        "description": "Fetches all GPS coordinates...",
+        "parameters": { ... full JSON schema ... }
+      },
+      {
+        "type": "function",
+        "name": "calculate_min_distances",
+        ...
+      },
+      {
+        "type": "function",
+        "name": "save_person_distances",
+        ...
+      }
+    ],
+    "tool_choice": "auto",
+    "input": [ ...conversation so far... ]
+  }
+
+  The AI needs the schemas on every round because — as mentioned — it has no
+  memory. Each call is stateless. Without the schemas, it wouldn't know what
+  tools are available when deciding whether to call another one or give a final
+  answer.
+
+❯ Wait, I thought it would be enough to send the schemas once, if they fit in   
+the context, why would we resend them every single time...?                     
+
+● You're right to question it — and your intuition is correct in principle. If 
+  the API maintained a persistent context on the server, you could send the
+  schemas once and they'd stay there.
+
+  But the API we're using is completely stateless. The server does not remember
+  anything between calls. Each call to chat() is an entirely independent HTTP
+  request — the server has no idea you called it 30 seconds ago. So we have no
+  choice but to resend everything every time, including:
+
+  - the system prompt (instructions)
+  - the tool schemas (tools)
+  - the full conversation history (input)
+
+  It's all just one big JSON blob sent fresh each time.
+
+  ---
+  Why is it designed this way?
+
+  Simplicity and scalability. A stateless API means Anthropic/OpenAI can handle
+  millions of concurrent users without storing anyone's conversation state on
+  their servers. Your app owns the state, the server just processes one request
+  and forgets it.
+
+  ---
+  Does it waste tokens?
+
+  Yes — this is a real cost. The schemas, system prompt, and growing
+  conversation are all re-tokenised and re-processed on every round. This is one
+   reason why:
+
+  - you want tool descriptions to be concise
+  - you want MAX_TOOL_ROUNDS to be a reasonable limit
+  - you clear the conversation between persons (our processQuery pattern) —
+  otherwise the history from person 1 would still be in the payload when
+  processing person 5
+
+  ---
+  Is there a way around it?
+
+  Some APIs offer context caching — you pay to store a chunk of tokens
+  server-side (like the system prompt and tool schemas) and reference it by ID
+  in future calls. OpenAI calls this prompt caching, Anthropic has it too. It
+  reduces cost and latency for the repeated parts. But the underlying model is
+  still stateless — caching is just an optimisation, not true persistent memory.
+
+❯ Ahh sure, I get it now, it's the same with chat history, it grows and with    
+time we send bigger and bigger messages. However the tool calling is physically 
+ present as attached to this very first message, right? It's just this message  
+gets resend every time along with tools? We do not repeat the tools block again 
+ and again, so that after 5 round, there are in fact 5 identical tool blocks in 
+ our prompt?                                                                    
+
+● Exactly right. The tools are not part of the conversation history (input
+  array). They sit in their own separate tools field in the request body:
+
+  {
+    "model": "gpt-4.1-mini",
+    "instructions": "...",
+    "tools": [ ...schemas... ],      ← separate field, always the same
+    "input": [                        ← this is what grows
+      { "role": "user", "content": "Investigate Jacek Nowak..." },
+      { "type": "function_call", ... },
+      { "type": "function_call_output", ... },
+      { "type": "function_call", ... },
+      { "type": "function_call_output", ... }
+    ]
+  }
+
+  So after 5 rounds:
+  - tools — sent 5 times, but it's always one copy of the schemas
+  - input — grows by 2 items per round (one tool call + one result)
+  - instructions — sent 5 times, always the same single string
+
+  There is no duplication of the schemas inside the conversation. The tool call
+  objects inside input only contain the name and arguments of the call — not the
+   full schema definition. The schema lives only in the tools field.
+
+  { "type": "function_call", "name": "get_person_locations", "arguments":
+  "{...}" }
+
+  Not:
+
+  { "type": "function_call", "name": "get_person_locations", "description":
+  "...", "parameters": { ...full schema... } }
+
+  So yes — you understood it perfectly.
+
+❯ /export 260321_week21_learn                                                   
+  ⎿  Conversation exported to:
+     C:\VSCODE\4th-devs_weeks\week1-2\260321_week21_learn.txt

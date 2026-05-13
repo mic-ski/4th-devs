@@ -1,0 +1,10 @@
+{
+  "apikey": "dc72073c-8fe4-4e81-b473-c22e0b2c296d",
+  "task": "findhim",
+  "answer": {
+    "name": "Wojciech",
+    "surname": "Bielik",
+    "accessLevel": 7,
+    "powerPlant": "PWR2758PL"
+  }
+}

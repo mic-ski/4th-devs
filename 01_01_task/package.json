@@ -1,0 +1,19 @@
+{
+  "name": "01_01_task",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "People filter with LLM job tagging",
+  "scripts": {
+    "filter": "node filter.js",
+    "tag": "node tag-jobs.js",
+    "final": "node final.js",
+    "send": "node send.js",
+    "post": "node post.js",
+    "secret-age": "node secret-age.js",
+    "secret-city": "node secret-city.js",
+    "post-secret": "node post-secret.js",
+    "secret-final": "node secret-final.js",
+    "post-secret-final": "node post-secret-final.js"
+  },
+  "license": "ISC"
+}

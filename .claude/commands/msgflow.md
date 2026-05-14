@@ -1,4 +1,4 @@
-Read all .js files in the project folder: $ARGUMENTS (skip node_modules) and generate a Mermaid sequence diagram showing the runtime message flow — user input → which function handles it → which tools get called → what returns to the user.
+Read all .js files in the project folder: $ARGUMENTS (skip node_modules, skip files matching *-help.js) and generate a Mermaid sequence diagram showing the runtime message flow — user input → which function handles it → which tools get called → what returns to the user.
 
 - Participants should be the actual module files, not generic labels
 - Use autonumber for step references

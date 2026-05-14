@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_core — Code Cards</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 40px 32px 64px;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #4a5568;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #2d3748;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Card header ── */
+    .card-head {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .type-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      flex-shrink: 0;
+    }
+
+    .filename {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .filepath {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+      margin-top: 2px;
+    }
+
+    /* ── Purpose ── */
+    .card-purpose {
+      padding: 14px 20px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #8b949e;
+      border-bottom: 1px solid #21262d;
+      flex: 1;
+    }
+
+    /* ── Sections ── */
+    .card-section {
+      padding: 13px 20px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-section:last-child {
+      border-bottom: none;
+    }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3d444d;
+      margin-bottom: 9px;
+    }
+
+    /* ── Chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .chip {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .chip-export {
+      background: #0d2818;
+      color: #7ee8a2;
+      border: 1px solid #1a4731;
+    }
+
+    .chip-import {
+      background: #0d1b2e;
+      color: #79b8ff;
+      border: 1px solid #1a3352;
+    }
+
+    .none-text {
+      font-size: 12px;
+      color: #2d3748;
+      font-style: italic;
+    }
+
+    /* ── Import groups ── */
+    .import-group {
+      margin-bottom: 10px;
+    }
+
+    .import-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .import-source {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+      margin-bottom: 5px;
+    }
+
+    .import-source span {
+      color: #4a5568;
+    }
+
+    /* ── Type colour tokens ── */
+    .type-entry  { --accent: #f97316; }
+    .type-local  { --accent: #3b82f6; }
+    .type-config { --accent: #a855f7; }
+    .type-npm    { --accent: #6b7280; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>01_03_mcp_core / code cards</h1>
+  <p>10 source files · imports, exports, and purpose at a glance</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const files = [
+  {
+    filename: 'app.js',
+    path: 'app.js',
+    type: 'entry',
+    typeLabel: 'entry point',
+    purpose: 'Orchestrates the full MCP demo. Spawns the server as a child process, connects as a client over stdio, then exercises every MCP capability in sequence: listing and calling tools, reading resources, and fetching a rendered prompt template. Shows the complete client-server lifecycle.',
+    exports: [],
+    imports: [
+      { from: 'src/client.js',  names: ['createMcpClient'] },
+      { from: 'src/log.js',     names: ['heading', 'log', 'parseToolResult'] },
+      { from: '../config.js',   names: ['resolveModelForProvider'] },
+    ],
+  },
+  {
+    filename: 'server.js',
+    path: 'src/server.js',
+    type: 'entry',
+    typeLabel: 'entry point',
+    purpose: 'MCP server entry point. Loads tool, resource, and prompt definitions from their respective files, registers them on an McpServer instance, then listens over stdio transport. Handles SIGINT and SIGTERM for a clean shutdown. Runs as a subprocess spawned by the client.',
+    exports: [],
+    imports: [
+      { from: '@modelcontextprotocol/sdk', names: ['McpServer', 'StdioServerTransport'] },
+      { from: 'src/tools.js',             names: ['tools'] },
+      { from: 'src/resources.js',         names: ['resources'] },
+      { from: 'src/prompts.js',           names: ['prompts'] },
+    ],
+  },
+  {
+    filename: 'client.js',
+    path: 'src/client.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'MCP client factory. Creates and connects a Client instance over stdio transport by spawning the server as a child process. Declares sampling and elicitation capabilities and wires up their request handlers so the server can call back into the client for LLM completions and user confirmations.',
+    exports: ['createMcpClient'],
+    imports: [
+      { from: '@modelcontextprotocol/sdk', names: ['Client', 'StdioClientTransport', 'CreateMessageRequestSchema', 'ElicitRequestSchema'] },
+      { from: 'src/sampling.js',           names: ['createSamplingHandler'] },
+      { from: 'src/elicitation.js',        names: ['createElicitationHandler'] },
+      { from: 'src/log.js',                names: ['clientLog'] },
+      { from: 'url',                       names: ['fileURLToPath'] },
+      { from: 'path',                      names: ['dirname', 'join'] },
+    ],
+  },
+  {
+    filename: 'ai.js',
+    path: 'src/ai.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'AI provider client. Thin wrapper around the Responses API. Sends a POST request with the model, input messages, and token limit, then extracts the text from the response. Handles both the shorthand output_text field and the nested output[].content[].text format.',
+    exports: ['completion'],
+    imports: [
+      { from: '../config.js', names: ['AI_API_KEY', 'EXTRA_API_HEADERS', 'RESPONSES_API_ENDPOINT'] },
+    ],
+  },
+  {
+    filename: 'sampling.js',
+    path: 'src/sampling.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Sampling handler. Bridges MCP sampling requests — where the server asks the client to call an LLM on its behalf — to the AI provider. Converts MCP message format to the Responses API input shape, calls completion, and returns the result in the MCP sampling response format.',
+    exports: ['createSamplingHandler'],
+    imports: [
+      { from: 'src/ai.js',  names: ['completion'] },
+      { from: 'src/log.js', names: ['clientLog'] },
+    ],
+  },
+  {
+    filename: 'elicitation.js',
+    path: 'src/elicitation.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Elicitation handler. Responds to server-initiated form requests by auto-filling defaults inferred from the JSON Schema: explicit default → boolean true → first enum value. Supports a custom onElicitation override for real UI interaction. Any non-form mode is declined.',
+    exports: ['createElicitationHandler'],
+    imports: [
+      { from: 'src/log.js', names: ['clientLog'] },
+    ],
+  },
+  {
+    filename: 'log.js',
+    path: 'src/log.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Logging and result utilities. ANSI-coloured console output for every stage of the demo — server spawn, connection, sampling, elicitation, and section headings. Also exports parseToolResult, which extracts and JSON-parses the text payload from a tool call response.',
+    exports: ['heading', 'log', 'parseToolResult', 'clientLog'],
+    imports: [],
+  },
+  {
+    filename: 'tools.js',
+    path: 'src/tools.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'MCP tool definitions. Two tools: calculate (basic arithmetic — add, subtract, multiply, divide) and summarize_with_confirmation, which demonstrates both elicitation (asking the client for user confirmation and style preference) and sampling (delegating summarization to the client\'s LLM via extra.sendRequest).',
+    exports: ['tools'],
+    imports: [
+      { from: 'zod', names: ['z'] },
+    ],
+  },
+  {
+    filename: 'resources.js',
+    path: 'src/resources.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'MCP resource definitions. Two resources exposed as read-only data: a static project config object (name, version, feature list) and a dynamic runtime stats object (uptime in seconds, request count, current timestamp) that generates fresh values on every read.',
+    exports: ['resources'],
+    imports: [],
+  },
+  {
+    filename: 'prompts.js',
+    path: 'src/prompts.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'MCP prompt definitions. A single code-review prompt template that accepts code, language, and focus parameters. The handler builds a user message with the appropriate review instruction from a focus map (security, performance, readability, or all).',
+    exports: ['prompts'],
+    imports: [
+      { from: 'zod', names: ['z'] },
+    ],
+  },
+];
+
+function chipHTML(name, cls) {
+  return `<span class="chip ${cls}">${name}</span>`;
+}
+
+function renderCard(f) {
+  const exportsHTML = f.exports.length
+    ? `<div class="chips">${f.exports.map(e => chipHTML(e, 'chip-export')).join('')}</div>`
+    : `<span class="none-text">none — entry point</span>`;
+
+  const importsHTML = f.imports.length
+    ? f.imports.map(imp => `
+        <div class="import-group">
+          <div class="import-source"><span>from</span> ${imp.from}</div>
+          <div class="chips">${imp.names.map(n => chipHTML(n, 'chip-import')).join('')}</div>
+        </div>`).join('')
+    : `<span class="none-text">no local imports</span>`;
+
+  return `
+    <div class="card type-${f.type}">
+      <div class="card-head">
+        <div class="card-meta">
+          <span class="type-badge">${f.typeLabel}</span>
+          <span class="filename">${f.filename}</span>
+        </div>
+        <div class="filepath">${f.path}</div>
+      </div>
+      <div class="card-purpose">${f.purpose}</div>
+      <div class="card-section">
+        <div class="section-label">Exports</div>
+        ${exportsHTML}
+      </div>
+      <div class="card-section">
+        <div class="section-label">Imports from</div>
+        ${importsHTML}
+      </div>
+    </div>`;
+}
+
+document.getElementById('grid').innerHTML = files.map(renderCard).join('');
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-Read all .js files in the project folder: $ARGUMENTS (skip node_modules) and generate a single self-contained HTML file that shows an interactive graph of how modules import each other, and what functions each file exports.
+Read all .js files in the project folder: $ARGUMENTS (skip node_modules, skip files matching *-help.js) and generate a single self-contained HTML file that shows an interactive graph of how modules import each other, and what functions each file exports.
 
 Use D3.js (loaded from its CDN) for the force-directed layout and SVG rendering. All module parsing, node classification, and tooltip logic should be written from scratch based on the files read.
 

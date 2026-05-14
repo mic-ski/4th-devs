@@ -91,6 +91,7 @@ Triggered when I ask for a file using the pattern `FILENAME-help.EXTENSION`
 - `process.env` and environment variables
 - `fetch()` and HTTP requests
 - `fs/promises` file system methods
+- **Object-as-instance pattern** — a factory function that returns a plain object with methods, used instead of a class. When you see this, explicitly call it out: explain that the object is not a class instance, that the dot is just property access, and that this is a deliberate JS pattern for bundling behaviour without the overhead of `class`.
 
 ### What not to do in Learn mode
 
@@ -118,6 +119,7 @@ Triggered when I say **"distill"** and provide a filename (e.g. `"distill to s01
 - **Mental models and analogies** used during the conversation — preserve these word-for-word or close to it, they are intentional teaching tools not throwaway chat
 - Code examples that illustrate the concept clearly
 - Python comparisons only where they added real clarity
+- **JS patterns that replace class-based thinking** — whenever a factory function, closure, or plain object is used where a Python developer would expect a class, flag it explicitly and explain the pattern and why JS code is written this way
 
 ### Format rules
 

@@ -1,4 +1,4 @@
-Read all .js files in the project folder: $ARGUMENTS (skip node_modules). Ask me which query to trace if I haven't specified one, then generate a self-contained HTML file tracing that single query end-to-end through the system.
+Read all .js files in the project folder: $ARGUMENTS (skip node_modules, skip files matching *-help.js). Ask me which query to trace if I haven't specified one, then generate a self-contained HTML file tracing that single query end-to-end through the system.
 
 Each stage in the execution is a card showing:
 - The module name, file path, and type (colour-accented by type)

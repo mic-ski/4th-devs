@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>01_03_mcp_translator — Code Cards</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 40px 32px 64px;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #4a5568;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #2d3748;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Card header ── */
+    .card-head {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .type-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      flex-shrink: 0;
+    }
+
+    .filename {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .filepath {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+      margin-top: 2px;
+    }
+
+    /* ── Purpose ── */
+    .card-purpose {
+      padding: 14px 20px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #8b949e;
+      border-bottom: 1px solid #21262d;
+      flex: 1;
+    }
+
+    /* ── Sections ── */
+    .card-section {
+      padding: 13px 20px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .card-section:last-child {
+      border-bottom: none;
+    }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3d444d;
+      margin-bottom: 9px;
+    }
+
+    /* ── Chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .chip {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .chip-export {
+      background: #0d2818;
+      color: #7ee8a2;
+      border: 1px solid #1a4731;
+    }
+
+    .chip-import {
+      background: #0d1b2e;
+      color: #79b8ff;
+      border: 1px solid #1a3352;
+    }
+
+    .none-text {
+      font-size: 12px;
+      color: #2d3748;
+      font-style: italic;
+    }
+
+    /* ── Import groups ── */
+    .import-group {
+      margin-bottom: 10px;
+    }
+
+    .import-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .import-source {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 11px;
+      color: #3d444d;
+      margin-bottom: 5px;
+    }
+
+    .import-source span {
+      color: #4a5568;
+    }
+
+    /* ── Type colour tokens ── */
+    .type-entry  { --accent: #f97316; }
+    .type-local  { --accent: #3b82f6; }
+    .type-config { --accent: #a855f7; }
+    .type-npm    { --accent: #6b7280; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>01_03_mcp_translator / code cards</h1>
+  <p>9 source files · imports, exports, and purpose at a glance</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const files = [
+  {
+    filename: 'app.js',
+    path: 'app.js',
+    type: 'entry',
+    typeLabel: 'entry point',
+    purpose: 'Application entry point. Connects to the MCP file-server, starts the polling translation loop that watches for new files, and launches the HTTP API server. Registers SIGINT and SIGTERM handlers for graceful shutdown — closing the MCP client and HTTP server cleanly before exiting.',
+    exports: [],
+    imports: [
+      { from: 'src/mcp/client.js',    names: ['createMcpClient', 'listMcpTools'] },
+      { from: 'src/translator.js',    names: ['runTranslationLoop'] },
+      { from: 'src/server.js',        names: ['startHttpServer'] },
+      { from: 'src/config.js',        names: ['server'] },
+      { from: 'src/helpers/logger.js', names: ['log (default)'] },
+    ],
+  },
+  {
+    filename: 'agent.js',
+    path: 'src/agent.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Drives the agentic loop — sends a user query to the AI, runs any tool calls it requests via MCP, feeds the results back, and repeats until the model returns a plain-text response or the 80-step safety limit is hit. Returns the final text and a log of every tool call made.',
+    exports: ['run'],
+    imports: [
+      { from: 'helpers/api.js',    names: ['chat', 'extractToolCalls', 'extractText'] },
+      { from: 'mcp/client.js',     names: ['callMcpTool', 'mcpToolsToOpenAI'] },
+      { from: 'helpers/logger.js', names: ['log (default)'] },
+    ],
+  },
+  {
+    filename: 'config.js',
+    path: 'src/config.js',
+    type: 'config',
+    typeLabel: 'shared config',
+    purpose: 'Central configuration for the project. Defines the AI model, token limit, and full system prompt (translator persona and chunking strategy for large files). Also sets HTTP server defaults and file-watcher settings: source and output directories, poll interval, and accepted file extensions.',
+    exports: ['api', 'server', 'translator'],
+    imports: [
+      { from: '../../config.js (project root)', names: ['resolveModelForProvider'] },
+    ],
+  },
+  {
+    filename: 'api.js',
+    path: 'src/helpers/api.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Thin wrapper around the AI Responses API. Builds the request body (model, tools, instructions, token limit), POSTs to the endpoint, records token usage, and returns the raw response object. Also exports two helpers to extract tool calls and text content out of that response.',
+    exports: ['chat', 'extractToolCalls', 'extractText'],
+    imports: [
+      { from: '../config.js',                   names: ['api'] },
+      { from: '../../../config.js (project root)', names: ['AI_API_KEY', 'EXTRA_API_HEADERS', 'RESPONSES_API_ENDPOINT'] },
+      { from: './stats.js',                     names: ['recordUsage'] },
+    ],
+  },
+  {
+    filename: 'logger.js',
+    path: 'src/helpers/logger.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Structured CLI logger built on top of consola. Exposes purpose-named methods for standard log levels plus custom events: tool call start and result (with output truncation), API request start and completion (with token counts and cache hit rate), and HTTP endpoint listing.',
+    exports: ['log (named)', 'log (default)'],
+    imports: [
+      { from: 'consola (npm)', names: ['consola', 'createConsola'] },
+    ],
+  },
+  {
+    filename: 'stats.js',
+    path: 'src/helpers/stats.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Accumulates token usage data across all API calls during a session. Stores running totals for input, output, cached, and total tokens. getStats() returns everything including a computed cache-hit percentage. logStats() prints a one-line summary to the console.',
+    exports: ['recordUsage', 'getStats', 'logStats', 'default object'],
+    imports: [
+      { from: './logger.js', names: ['log (default)'] },
+    ],
+  },
+  {
+    filename: 'client.js',
+    path: 'src/mcp/client.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'MCP protocol client. Reads server config from mcp.json, spawns the MCP server as a subprocess connected via stdio, and exposes four functions: connect, list available tools, call a named tool (parsing the text response back to JSON), and convert MCP tool definitions into the OpenAI function-calling format.',
+    exports: ['createMcpClient', 'listMcpTools', 'callMcpTool', 'mcpToolsToOpenAI'],
+    imports: [
+      { from: '@modelcontextprotocol/sdk (npm)', names: ['Client', 'StdioClientTransport'] },
+      { from: 'fs/promises · url · path (Node built-ins)', names: ['readFile', 'fileURLToPath', 'dirname', 'join'] },
+      { from: '../helpers/logger.js',            names: ['log (default)'] },
+    ],
+  },
+  {
+    filename: 'server.js',
+    path: 'src/server.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'Minimal HTTP server with CORS support and two POST endpoints. /api/chat accepts a free-form message and runs it through the full agent loop. /api/translate wraps raw text in a translation prompt and returns only the translated string. All actual logic is delegated to the agent.',
+    exports: ['startHttpServer'],
+    imports: [
+      { from: 'http (Node built-in)', names: ['createServer'] },
+      { from: './agent.js',           names: ['run'] },
+      { from: './helpers/logger.js',  names: ['log (default)'] },
+    ],
+  },
+  {
+    filename: 'translator.js',
+    path: 'src/translator.js',
+    type: 'local',
+    typeLabel: 'local module',
+    purpose: 'File-watching translation coordinator. Polls the source directory on a timer, diffs it against the output directory to find untranslated files, and fires the agent for each one. Prevents duplicate work with an in-progress Set, caps the session at 3 translations, and ensures both directories exist before the first tick.',
+    exports: ['runTranslationLoop'],
+    imports: [
+      { from: './config.js',         names: ['translator (as config)'] },
+      { from: './agent.js',          names: ['run'] },
+      { from: './mcp/client.js',     names: ['callMcpTool'] },
+      { from: './helpers/logger.js', names: ['log (default)'] },
+      { from: './helpers/stats.js',  names: ['logStats'] },
+    ],
+  },
+];
+
+function chipHTML(name, cls) {
+  return `<span class="chip ${cls}">${name}</span>`;
+}
+
+function renderCard(f) {
+  const exportsHTML = f.exports.length
+    ? `<div class="chips">${f.exports.map(e => chipHTML(e, 'chip-export')).join('')}</div>`
+    : `<span class="none-text">none — entry point</span>`;
+
+  const importsHTML = f.imports.length
+    ? f.imports.map(imp => `
+        <div class="import-group">
+          <div class="import-source"><span>from</span> ${imp.from}</div>
+          <div class="chips">${imp.names.map(n => chipHTML(n, 'chip-import')).join('')}</div>
+        </div>`).join('')
+    : `<span class="none-text">no local imports</span>`;
+
+  return `
+    <div class="card type-${f.type}">
+      <div class="card-head">
+        <div class="card-meta">
+          <span class="type-badge">${f.typeLabel}</span>
+          <span class="filename">${f.filename}</span>
+        </div>
+        <div class="filepath">${f.path}</div>
+      </div>
+      <div class="card-purpose">${f.purpose}</div>
+      <div class="card-section">
+        <div class="section-label">Exports</div>
+        ${exportsHTML}
+      </div>
+      <div class="card-section">
+        <div class="section-label">Imports from</div>
+        ${importsHTML}
+      </div>
+    </div>`;
+}
+
+document.getElementById('grid').innerHTML = files.map(renderCard).join('');
+</script>
+</body>
+</html>

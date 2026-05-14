@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>01_03_mcp_core — Module Graph</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  #canvas { width: 100vw; height: 100vh; display: block; }
+
+  /* ── Node labels ── */
+  .node-label {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 11px;
+    fill: #f0f6fc;
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  /* ── Tooltip card — same structure as code-cards ── */
+  #tooltip {
+    position: fixed;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 300px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 10;
+  }
+  #tooltip.visible { opacity: 1; }
+
+  .tt-head {
+    padding: 14px 16px 11px;
+    border-bottom: 1px solid #21262d;
+    border-left: 3px solid var(--accent, #3b82f6);
+  }
+  .tt-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+  .type-badge {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent, #3b82f6) 15%, transparent);
+    color: var(--accent, #3b82f6);
+    border: 1px solid color-mix(in srgb, var(--accent, #3b82f6) 30%, transparent);
+    flex-shrink: 0;
+  }
+  .tt-filename {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: #f0f6fc;
+  }
+  .tt-filepath {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 10px;
+    color: #3d444d;
+    margin-top: 1px;
+  }
+
+  .tt-section {
+    padding: 10px 16px;
+    border-bottom: 1px solid #21262d;
+  }
+  .tt-section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3d444d;
+    margin-bottom: 7px;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  .chip {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .chip-export { background: #0d2818; color: #7ee8a2; border: 1px solid #1a4731; }
+  .chip-import { background: #0d1b2e; color: #79b8ff; border: 1px solid #1a3352; }
+
+  .import-group { margin-bottom: 8px; }
+  .import-group:last-child { margin-bottom: 0; }
+  .import-source {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 10px;
+    color: #3d444d;
+    margin-bottom: 4px;
+  }
+  .import-source span { color: #4a5568; }
+  .none-text { font-size: 11px; color: #2d3748; font-style: italic; }
+
+  /* ── Legend ── */
+  #legend {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 2;
+  }
+  .legend-row { display: flex; align-items: center; gap: 8px; color: #8b949e; }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Header ── */
+  #header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 12px 20px;
+    background: linear-gradient(to bottom, #0d1117 60%, transparent);
+    pointer-events: none;
+  }
+  #header h1 {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a5568;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    letter-spacing: 0.03em;
+  }
+  #header p { font-size: 11px; color: #2d3748; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<svg id="canvas"></svg>
+<div id="tooltip"></div>
+
+<div id="header">
+  <h1>01_03_mcp_core / module graph</h1>
+  <p>10 source files · scroll to zoom · drag to pan · hover for details</p>
+</div>
+
+<div id="legend">
+  <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div>Entry point</div>
+  <div class="legend-row"><div class="legend-dot" style="background:#3b82f6"></div>Local module</div>
+  <div class="legend-row"><div class="legend-dot" style="background:#a855f7"></div>Shared config</div>
+  <div class="legend-row"><div class="legend-dot" style="background:#6b7280"></div>npm / built-in</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+const TYPE_COLORS = {
+  entry:  "#f97316",
+  local:  "#3b82f6",
+  config: "#a855f7",
+  npm:    "#6b7280"
+};
+
+const TYPE_LABELS = {
+  entry:  "entry point",
+  local:  "local module",
+  config: "shared config",
+  npm:    "npm / built-in"
+};
+
+const RADII = { entry: 28, local: 22, config: 22, npm: 17 };
+
+const nodes = [
+  {
+    id: "app.js", label: "app.js", path: "app.js",
+    type: "entry",
+    exports: [],
+    imports: [
+      { from: "src/client.js", names: ["createMcpClient"] },
+      { from: "src/log.js",    names: ["heading", "log", "parseToolResult"] },
+      { from: "../config.js",  names: ["resolveModelForProvider"] }
+    ]
+  },
+  {
+    id: "src/server.js", label: "server.js", path: "src/server.js",
+    type: "entry",
+    exports: [],
+    imports: [
+      { from: "@modelcontextprotocol/sdk", names: ["McpServer", "StdioServerTransport"] },
+      { from: "src/tools.js",              names: ["tools"] },
+      { from: "src/resources.js",          names: ["resources"] },
+      { from: "src/prompts.js",            names: ["prompts"] }
+    ]
+  },
+  {
+    id: "src/client.js", label: "client.js", path: "src/client.js",
+    type: "local",
+    exports: ["createMcpClient"],
+    imports: [
+      { from: "@modelcontextprotocol/sdk", names: ["Client", "StdioClientTransport", "CreateMessageRequestSchema", "ElicitRequestSchema"] },
+      { from: "src/sampling.js",           names: ["createSamplingHandler"] },
+      { from: "src/elicitation.js",        names: ["createElicitationHandler"] },
+      { from: "src/log.js",                names: ["clientLog"] },
+      { from: "url",                       names: ["fileURLToPath"] },
+      { from: "path",                      names: ["dirname", "join"] }
+    ]
+  },
+  {
+    id: "src/ai.js", label: "ai.js", path: "src/ai.js",
+    type: "local",
+    exports: ["completion"],
+    imports: [
+      { from: "../config.js", names: ["AI_API_KEY", "EXTRA_API_HEADERS", "RESPONSES_API_ENDPOINT"] }
+    ]
+  },
+  {
+    id: "src/sampling.js", label: "sampling.js", path: "src/sampling.js",
+    type: "local",
+    exports: ["createSamplingHandler"],
+    imports: [
+      { from: "src/ai.js",  names: ["completion"] },
+      { from: "src/log.js", names: ["clientLog"] }
+    ]
+  },
+  {
+    id: "src/elicitation.js", label: "elicitation.js", path: "src/elicitation.js",
+    type: "local",
+    exports: ["createElicitationHandler"],
+    imports: [
+      { from: "src/log.js", names: ["clientLog"] }
+    ]
+  },
+  {
+    id: "src/log.js", label: "log.js", path: "src/log.js",
+    type: "local",
+    exports: ["heading", "log", "parseToolResult", "clientLog"],
+    imports: []
+  },
+  {
+    id: "src/tools.js", label: "tools.js", path: "src/tools.js",
+    type: "local",
+    exports: ["tools"],
+    imports: [{ from: "zod", names: ["z"] }]
+  },
+  {
+    id: "src/resources.js", label: "resources.js", path: "src/resources.js",
+    type: "local",
+    exports: ["resources"],
+    imports: []
+  },
+  {
+    id: "src/prompts.js", label: "prompts.js", path: "src/prompts.js",
+    type: "local",
+    exports: ["prompts"],
+    imports: [{ from: "zod", names: ["z"] }]
+  },
+  {
+    id: "../config.js", label: "config.js", path: "../config.js",
+    type: "config",
+    exports: ["AI_API_KEY", "EXTRA_API_HEADERS", "RESPONSES_API_ENDPOINT", "resolveModelForProvider"],
+    imports: []
+  },
+  {
+    id: "@modelcontextprotocol/sdk", label: "@mcp/sdk", path: "@modelcontextprotocol/sdk",
+    type: "npm", exports: [], imports: []
+  },
+  {
+    id: "zod", label: "zod", path: "zod",
+    type: "npm", exports: [], imports: []
+  },
+  {
+    id: "url", label: "url", path: "url (node built-in)",
+    type: "npm", exports: [], imports: []
+  },
+  {
+    id: "path", label: "path", path: "path (node built-in)",
+    type: "npm", exports: [], imports: []
+  }
+];
+
+const links = [];
+nodes.forEach(n => {
+  n.imports.forEach(imp => {
+    links.push({ source: n.id, target: imp.from });
+  });
+});
+
+// Build reverse map: who imports from each node
+const importedBy = {};
+nodes.forEach(n => {
+  n.imports.forEach(imp => {
+    (importedBy[imp.from] ??= []).push({ file: n.id, names: imp.names });
+  });
+});
+
+// ── D3 setup ────────────────────────────────────────────────
+
+const width  = window.innerWidth;
+const height = window.innerHeight;
+
+const svg = d3.select("#canvas")
+  .attr("width", width)
+  .attr("height", height);
+
+svg.append("defs").append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", "0 -4 8 8")
+  .attr("refX", 8).attr("refY", 0)
+  .attr("markerWidth", 6).attr("markerHeight", 6)
+  .attr("orient", "auto")
+  .append("path")
+    .attr("d", "M0,-4L8,0L0,4")
+    .attr("fill", "#3d444d");
+
+const g = svg.append("g");
+
+svg.call(
+  d3.zoom().scaleExtent([0.25, 3])
+    .on("zoom", e => g.attr("transform", e.transform))
+);
+
+const simulation = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d => d.id).distance(d => {
+    const t = d.target.type ?? nodes.find(n => n.id === d.target)?.type;
+    return (t === "npm" || t === "config") ? 170 : 130;
+  }))
+  .force("charge", d3.forceManyBody().strength(-450))
+  .force("center",    d3.forceCenter(width / 2, height / 2))
+  .force("collision", d3.forceCollide().radius(d => RADII[d.type] + 14));
+
+// ── Links ────────────────────────────────────────────────────
+
+const link = g.append("g")
+  .selectAll("line")
+  .data(links)
+  .join("line")
+    .attr("stroke", "#21262d")
+    .attr("stroke-width", 1.5)
+    .attr("marker-end", "url(#arrow)");
+
+// ── Nodes ────────────────────────────────────────────────────
+
+const node = g.append("g")
+  .selectAll("g")
+  .data(nodes)
+  .join("g")
+    .style("cursor", "grab")
+    .call(
+      d3.drag()
+        .on("start", (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+        .on("drag",  (e, d) => { d.fx = e.x; d.fy = e.y; })
+        .on("end",   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+    );
+
+// Outer ring (accent colour at low opacity)
+node.append("circle")
+  .attr("r", d => RADII[d.type] + 3)
+  .attr("fill", d => TYPE_COLORS[d.type])
+  .attr("fill-opacity", 0.12)
+  .attr("stroke", "none");
+
+// Main filled circle
+node.append("circle")
+  .attr("r", d => RADII[d.type])
+  .attr("fill", d => TYPE_COLORS[d.type])
+  .attr("fill-opacity", 0.9)
+  .attr("stroke", "#0d1117")
+  .attr("stroke-width", 2);
+
+node.append("text")
+  .attr("class", "node-label")
+  .text(d => d.label);
+
+// ── Tooltip ──────────────────────────────────────────────────
+
+const tooltip = document.getElementById("tooltip");
+
+function chip(name, cls) {
+  return `<span class="chip ${cls}">${name}</span>`;
+}
+
+node.on("mousemove", (e, d) => {
+  const color = TYPE_COLORS[d.type];
+
+  let exportsHTML;
+  if (d.exports.length) {
+    exportsHTML = `<div class="chips">${d.exports.map(n => chip(n, "chip-export")).join("")}</div>`;
+  } else {
+    exportsHTML = `<span class="none-text">none</span>`;
+  }
+
+  let importsHTML;
+  if (d.imports.length) {
+    importsHTML = d.imports.map(imp => `
+      <div class="import-group">
+        <div class="import-source"><span>from</span> ${imp.from}</div>
+        <div class="chips">${imp.names.map(n => chip(n, "chip-import")).join("")}</div>
+      </div>`).join("");
+  } else {
+    importsHTML = `<span class="none-text">no imports</span>`;
+  }
+
+  const consumers = importedBy[d.id] || [];
+  let consumedHTML = "";
+  if (consumers.length) {
+    consumedHTML = `
+      <div class="tt-section">
+        <div class="section-label">Imported by</div>
+        ${consumers.map(c => `
+          <div class="import-group">
+            <div class="import-source"><span>by</span> ${c.file}</div>
+            <div class="chips">${c.names.map(n => chip(n, "chip-import")).join("")}</div>
+          </div>`).join("")}
+      </div>`;
+  }
+
+  tooltip.innerHTML = `
+    <div class="tt-head" style="--accent:${color}">
+      <div class="tt-meta">
+        <span class="type-badge" style="--accent:${color}">${TYPE_LABELS[d.type]}</span>
+        <span class="tt-filename">${d.label}</span>
+      </div>
+      <div class="tt-filepath">${d.path}</div>
+    </div>
+    <div class="tt-section">
+      <div class="section-label">Exports</div>
+      ${exportsHTML}
+    </div>
+    <div class="tt-section">
+      <div class="section-label">Imports from</div>
+      ${importsHTML}
+    </div>
+    ${consumedHTML}
+  `;
+
+  tooltip.style.setProperty("--accent", color);
+  tooltip.classList.add("visible");
+
+  const tx = Math.min(e.clientX + 18, window.innerWidth  - 320);
+  const ty = Math.min(e.clientY + 18, window.innerHeight - tooltip.offsetHeight - 10);
+  tooltip.style.left = tx + "px";
+  tooltip.style.top  = ty + "px";
+});
+
+node.on("mouseleave", () => tooltip.classList.remove("visible"));
+
+// ── Tick ─────────────────────────────────────────────────────
+
+const nodeById = Object.fromEntries(nodes.map(n => [n.id, n]));
+
+simulation.on("tick", () => {
+  link
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => {
+      const dx = d.target.x - d.source.x;
+      const dy = d.target.y - d.source.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const r = RADII[d.target.type] + 9;
+      return d.target.x - (dx / dist) * r;
+    })
+    .attr("y2", d => {
+      const dx = d.target.x - d.source.x;
+      const dy = d.target.y - d.source.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const r = RADII[d.target.type] + 9;
+      return d.target.y - (dy / dist) * r;
+    });
+
+  node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+</script>
+</body>
+</html>

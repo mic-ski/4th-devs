@@ -1,4 +1,4 @@
-Read all .js files in the project folder: $ARGUMENTS (skip node_modules) and produce a Mermaid flowchart diagram showing the call flow — starting from the entry point, which functions call which, and where any MCP tool calls happen.
+Read all .js files in the project folder: $ARGUMENTS (skip node_modules, skip files matching *-help.js) and produce a Mermaid flowchart diagram showing the call flow — starting from the entry point, which functions call which, and where any MCP tool calls happen.
 
 - Use subgraphs to group related stages (setup, agent loop, tool execution, response)
 - Colour-code with classDef: entry point (orange), MCP calls (cyan), native calls (green), external HTTP (dashed grey)
